@@ -7,10 +7,11 @@ import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 
 let camera, scene, renderer;
 let model;
-let angleX = 0.00, angleY = 0.02, angleZ = 0.00;
+const angleX = 0.00, angleY = 0.02, angleZ = 0.00;
+
+var hdr_bg = true;
 
 init();
-render();
 
 function init() {
 
@@ -22,36 +23,61 @@ function init() {
 
     scene = new THREE.Scene();
 
+    const ambientLight = new THREE.AmbientLight(0xededed, 0.8);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    //scene.add(ambientLight);
+    //scene.add(directionalLight);
+    directionalLight.position.set(10, 11, 7);
+
     new RGBELoader()
         .setPath( 'static/backgrounds/' )
         .load( 'royal_esplanade_1k.hdr', function ( texture ) {     // add HDR background
 
             texture.mapping = THREE.EquirectangularReflectionMapping;
 
-            scene.background = texture;
-            scene.environment = texture;
+            if(hdr_bg) {
+              scene.background = texture;
+              scene.environment = texture;
+            } else {
+                //scene.background = new THREE.Color(0xffffff);
+            }
 
             render(); // start rendering background
 
             // Add GLTF model
-            const loader = new GLTFLoader().setPath( 'static/models/gemring2/' );
+            //const loader = new GLTFLoader().setPath( 'static/models/gemring2/' );
             
-            loader.load( 'scene.gltf', function ( gltf ) {
+            //loader.load( 'scene.gltf', function ( gltf ) {
+            
+            // set path to models folder
+            const loader = new GLTFLoader().setPath( 'static/models/' );
+            
+            loader.load( 'ring_gold_with_diamond.glb', function ( gltf ) {
                 model = gltf.scene;
+                /*model.traverse((o) => {
+                    if(o.isMesh) console.log(o);
+                    //if(o.isMesh) o.material = new THREE.MeshNormalMaterial;
+                    if(o.isMesh) o.material.transparent = false;
+                });*/
                 scene.add( model );
                 animate();
-                //render();
             } );
 
         } );
 
     renderer = new THREE.WebGLRenderer( { antialias: true, preserveDrawingBuffer: true } );
     renderer.setPixelRatio( window.devicePixelRatio );
-    //renderer.setSize( window.innerWidth, window.innerHeight );
-    renderer.setSize( 768, 768 );
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 4;
-    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    //renderer.setSize( 768, 768 );
+    if(hdr_bg) {
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 4;
+      renderer.outputEncoding = THREE.sRGBEncoding;
+    } else {
+        renderer.setClearColor(0xababab, 0.5);
+    }
+    
+    
     container.appendChild( renderer.domElement );
 
     const controls = new OrbitControls( camera, renderer.domElement );
@@ -62,7 +88,6 @@ function init() {
     controls.update();
 
     //window.addEventListener( 'resize', onWindowResize );
-
 }
 
 
