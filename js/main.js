@@ -6,6 +6,8 @@ import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 
 
 let camera, scene, renderer;
+let model;
+let angleX = 0.00, angleY = 0.02, angleZ = 0.00;
 
 init();
 render();
@@ -33,8 +35,10 @@ function init() {
 
             // Add GLTF model
             const loader = new GLTFLoader().setPath( 'static/models/gemring2/' );
+            
             loader.load( 'scene.gltf', function ( gltf ) {
-                scene.add( gltf.scene );
+                model = gltf.scene;
+                scene.add( model );
                 render();
             } );
 
@@ -42,9 +46,10 @@ function init() {
 
     renderer = new THREE.WebGLRenderer( { antialias: true, preserveDrawingBuffer: true } );
     renderer.setPixelRatio( window.devicePixelRatio );
-    renderer.setSize( window.innerWidth, window.innerHeight );
+    //renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.setSize( 768, 768 );
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1;
+    renderer.toneMappingExposure = 4;
     renderer.outputEncoding = THREE.sRGBEncoding;
     container.appendChild( renderer.domElement );
 
@@ -68,6 +73,23 @@ function onWindowResize() {
     render();
 }
 
+
+// Change Model angle
+function addAngle( angleX, angleY, angleZ ) {
+    if (model) {
+        model.rotation.x += angleX;
+        model.rotation.y += angleY;
+        model.rotation.z += angleZ;
+    }
+}
+
+// to stop: clearInterval(intervalId) 
+var intervalId = window.setInterval(function(){
+    // call your function here
+    addAngle(angleX, angleY, angleZ);
+    render();
+}, 500);
+
 function render() {
     renderer.render( scene, camera );
     //saveAsImage();
@@ -84,13 +106,34 @@ function saveAsImage() {
 
         imgData = renderer.domElement.toDataURL(strMime);
 
-        saveFile(imgData.replace(strMime, strDownloadMime), "screenshot.jpg");
+        // client side
+        //saveFile(imgData.replace(strMime, strDownloadMime), "screenshot.jpg");
+        //postFile(imgData.replace(strMime, strDownloadMime), "screenshot.png"); // TODO: model name, also can upload new models
+
+        var request = require('request');
+        request({
+            url: "http://127.0.0.1:5173/".concat(filename),
+            method: "POST",
+            body: strData
+        }, function (error, response, body){
+            console.log(response);
+        });
 
     } catch (e) {
         console.log(e);
         return;
     }
 
+}
+
+var postFile = function(strData, filename) {
+    request({
+        url: "http://127.0.0.1:5173/".concat(filename),
+        method: "POST",
+        body: strData
+    }, function (error, response, body){
+        console.log(response);
+    });
 }
 
 var saveFile = function (strData, filename) {
