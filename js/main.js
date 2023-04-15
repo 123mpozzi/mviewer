@@ -31,7 +31,7 @@ function init() {
             scene.background = texture;
             scene.environment = texture;
 
-            render();
+            render(); // start rendering background
 
             // Add GLTF model
             const loader = new GLTFLoader().setPath( 'static/models/gemring2/' );
@@ -39,7 +39,8 @@ function init() {
             loader.load( 'scene.gltf', function ( gltf ) {
                 model = gltf.scene;
                 scene.add( model );
-                render();
+                animate();
+                //render();
             } );
 
         } );
@@ -54,13 +55,13 @@ function init() {
     container.appendChild( renderer.domElement );
 
     const controls = new OrbitControls( camera, renderer.domElement );
-    controls.addEventListener( 'change', render ); // use if there is no animation loop
+    //controls.addEventListener( 'change', render ); // use if there is no animation loop
     controls.minDistance = 2;
     controls.maxDistance = 10;
     controls.target.set( 0, 0, - 0.2 );
     controls.update();
 
-    window.addEventListener( 'resize', onWindowResize );
+    //window.addEventListener( 'resize', onWindowResize );
 
 }
 
@@ -75,20 +76,15 @@ function onWindowResize() {
 
 
 // Change Model angle
-function addAngle( angleX, angleY, angleZ ) {
+function animate () {
     if (model) {
         model.rotation.x += angleX;
         model.rotation.y += angleY;
         model.rotation.z += angleZ;
     }
-}
-
-// to stop: clearInterval(intervalId) 
-var intervalId = window.setInterval(function(){
-    // call your function here
-    addAngle(angleX, angleY, angleZ);
+    requestAnimationFrame(animate);
     render();
-}, 500);
+}
 
 function render() {
     renderer.render( scene, camera );
