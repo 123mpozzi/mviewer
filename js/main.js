@@ -1,40 +1,73 @@
 import * as THREE from 'three';
-//import { TrackballControls } from '../node_modules/three/examples/jsm/controls/TrackballControls.js';
+
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 
 
-// Scene
-const scene = new THREE.Scene();
+let camera, scene, renderer;
 
-// Camera
-const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+init();
+render();
 
-// Renderer
-const renderer = new THREE.WebGLRenderer();
-renderer.setSize( window.innerWidth, window.innerHeight );
-document.body.appendChild( renderer.domElement );
+function init() {
 
-// Add a cube to the scene
-const geometry = new THREE.BoxGeometry( 1, 1, 1 );
-const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-const cube = new THREE.Mesh( geometry, material );
-scene.add( cube );
+    const container = document.createElement( 'div' );
+    document.body.appendChild( container );
 
-camera.position.z = 5;
+    camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.25, 20 );
+    camera.position.set( - 1.8, 0.6, 2.7 );
 
-function animate() {
-	requestAnimationFrame( animate );
+    scene = new THREE.Scene();
 
-	cube.rotation.x += 0.01;
-	cube.rotation.y += 0.01;
+    new RGBELoader()
+        .setPath( 'static/backgrounds/' )
+        .load( 'royal_esplanade_1k.hdr', function ( texture ) {     // add HDR background
 
-	renderer.render( scene, camera );
+            texture.mapping = THREE.EquirectangularReflectionMapping;
+
+            scene.background = texture;
+            scene.environment = texture;
+
+            render();
+
+            // Add GLTF model
+            const loader = new GLTFLoader().setPath( 'static/models/gemring2/' );
+            loader.load( 'scene.gltf', function ( gltf ) {
+                scene.add( gltf.scene );
+                render();
+            } );
+
+        } );
+
+    renderer = new THREE.WebGLRenderer( { antialias: true } );
+    renderer.setPixelRatio( window.devicePixelRatio );
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1;
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    container.appendChild( renderer.domElement );
+
+    const controls = new OrbitControls( camera, renderer.domElement );
+    controls.addEventListener( 'change', render ); // use if there is no animation loop
+    controls.minDistance = 2;
+    controls.maxDistance = 10;
+    controls.target.set( 0, 0, - 0.2 );
+    controls.update();
+
+    window.addEventListener( 'resize', onWindowResize );
+
 }
 
-// Make Canvas Responsive
-window.addEventListener('resize', () => {
-    renderer.setSize(window.innerWidth, window.innerHeight);
+
+function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
-})
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    render();
+}
 
-animate();
+function render() {
+    renderer.render( scene, camera );
+}
+
