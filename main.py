@@ -3,7 +3,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 #from routers import upload, twoforms, unsplash, accordion
 
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from typing import Dict
@@ -34,7 +34,9 @@ async def upload(request: Request):
 async def create_upload_file(file: UploadFile = File(...)):
     with open(f"static/models/{file.filename}", "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
-    return {"filename": file.filename}
+    #return {"filename": file.filename}
+    # redirect to index
+    return RedirectResponse("/static/index.html", status_code=303)
 
 @app.post("/screen/")
 async def save_screenshot(input_data: str = Body(...)):
