@@ -108,6 +108,7 @@ function animate () {
         model.rotation.z += angleZ;
     }
     requestAnimationFrame(animate);
+    takeScreenshot();
     render();
 }
 
@@ -117,8 +118,7 @@ function render() {
 }
 
 
-// Screenshot Utils
-function saveAsImage() {
+function takeScreenshot() {
     var imgData, imgNode;
 
     try {
@@ -126,50 +126,22 @@ function saveAsImage() {
         var strDownloadMime = "image/octet-stream";
 
         imgData = renderer.domElement.toDataURL(strMime);
+        console.log(JSON.stringify({
+            input_data: imgData,
+        }));
 
-        // client side
-        //saveFile(imgData.replace(strMime, strDownloadMime), "screenshot.jpg");
-        //postFile(imgData.replace(strMime, strDownloadMime), "screenshot.png"); // TODO: model name, also can upload new models
-
-        fs.writeFileSync(path.join('screenshots', fileName), new Buffer.from(imgData, 'base64'))
-
-        /*
-        var request = require('request');
-        request({
-            url: "http://127.0.0.1:5173/".concat(filename),
+        fetch("http://localhost:8000/screen/", {
             method: "POST",
-            body: strData
-        }, function (error, response, body){
-            console.log(response);
-        });*/
-
+            body: JSON.stringify({
+                input_data: imgData,
+            }),
+            headers: {
+                contentType: "application/json; charset=utf-8",
+            },
+        });
     } catch (e) {
         console.log(e);
         return;
     }
 
 }
-
-var postFile = function(strData, filename) {
-    request({
-        url: "http://127.0.0.1:5173/".concat(filename),
-        method: "POST",
-        body: strData
-    }, function (error, response, body){
-        console.log(response);
-    });
-}
-
-var saveFile = function (strData, filename) {
-    var link = document.createElement('a');
-    if (typeof link.download === 'string') {
-        document.body.appendChild(link); //Firefox requires the link to be in the body
-        link.download = filename;
-        link.href = strData;
-        link.click();
-        document.body.removeChild(link); //remove the link when done
-    } else {
-        location.replace(uri);
-    }
-}
-
