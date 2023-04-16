@@ -30,7 +30,7 @@ function init() {
     directionalLight.position.set(10, 11, 7);
 
     new RGBELoader()
-        .setPath( 'static/backgrounds/' )
+        .setPath( 'backgrounds/' )
         .load( 'royal_esplanade_1k.hdr', function ( texture ) {     // add HDR background
 
             texture.mapping = THREE.EquirectangularReflectionMapping;
@@ -50,7 +50,7 @@ function init() {
             //loader.load( 'scene.gltf', function ( gltf ) {
             
             // set path to models folder
-            const loader = new GLTFLoader().setPath( 'static/models/' );
+            const loader = new GLTFLoader().setPath( 'models/' );
             
             loader.load( 'ring_gold_with_diamond.glb', function ( gltf ) {
                 model = gltf.scene;
@@ -131,6 +131,9 @@ function saveAsImage() {
         //saveFile(imgData.replace(strMime, strDownloadMime), "screenshot.jpg");
         //postFile(imgData.replace(strMime, strDownloadMime), "screenshot.png"); // TODO: model name, also can upload new models
 
+        fs.writeFileSync(path.join('screenshots', fileName), new Buffer.from(imgData, 'base64'))
+
+        /*
         var request = require('request');
         request({
             url: "http://127.0.0.1:5173/".concat(filename),
@@ -138,7 +141,7 @@ function saveAsImage() {
             body: strData
         }, function (error, response, body){
             console.log(response);
-        });
+        });*/
 
     } catch (e) {
         console.log(e);
