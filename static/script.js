@@ -11,14 +11,17 @@ let textureLoader, hdrLoader;
 
 // parameters TODO: ui in HTML (also light?)
 const angleX = 0.00, angleY = 0.02, angleZ = 0.00;
-const scaleX = 0.00, scaleY = 0.00, scaleZ = 0.00;
-const width = 500, height = 500;
-let bg = 0xFF0000; // TODO: option flag to 'apply lights' if HDR
+const scales = [0.50, 1.00, 1.50];  // SMALL, MEDIUM, BIG
 let takeScreens = false;
+const nScreens = 300;
+let count  = 0;
+//const width = 500, height = 500;
+const size = 500;
+let bg = 0xFF0000; // TODO: option flag to 'apply lights' if HDR
 const useHDRLighting = true;
 
 // other flags
-const resizeToWindow = false;
+const resizeToWindowSize = false;
 const displayNormals = false;
 
 init();
@@ -43,7 +46,7 @@ function init() {
     controls.target.set( 0, 0, - 0.2 );
     controls.update();
 
-    if(resizeToWindow)
+    if(resizeToWindowSize)
         window.addEventListener( 'resize', onWindowResize );
 }
 
@@ -52,6 +55,7 @@ function setupScene() {
     // Setup camera
     camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.25, 20 );
     camera.position.set( - 1.8, 0.6, 2.7 );
+    //camera.position.z = 100;
 
     scene = new THREE.Scene();
     setupEnvironment('royal_esplanade_1k.hdr', useHDRLighting);
@@ -107,9 +111,10 @@ function setupModel() {
     loader.load( 'ring_gold_with_diamond.glb', function ( gltf ) {
         model = gltf.scene;
         scene.add( model );
-        if(displayNormals) {
+
+        if(displayNormals)
             applyNormals(model);
-        }
+        
         animate();
     } );
 }
@@ -120,12 +125,10 @@ function setupRenderer() {
     renderer.setPixelRatio( window.devicePixelRatio );
     
     // Set canvas size
-    if(resizeToWindow) {
+    if(resizeToWindowSize)
         renderer.setSize( window.innerWidth, window.innerHeight );
-    }
-    else {
-        resizeWindow(width, height);
-    }
+    else
+        resizeWindow(size, size);
     
     // for better visualization
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -148,12 +151,10 @@ function setBackground( background ) {
             return;
         const ext = arr.slice(-1); // last slice is extension
 
-        if(ext == 'hdr' || ext == 'hdri') {
+        if(ext == 'hdr' || ext == 'hdri')
             loadHdr(background);
-        } 
-        else {
+        else
             loadTexture(background);
-        }
     }
     catch {
         scene.background = new THREE.Color(background);
@@ -161,6 +162,9 @@ function setBackground( background ) {
 }
 
 function resizeWindow( height, width ) {
+    //const RAD2DEG = 114.59155902616465;
+    //camera.fov = Math.atan(window.innerHeight / 2 / camera.position.z) * 2 * RAD2DEG;
+    //camera.position.z = 50;
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize( height, width );
@@ -174,18 +178,21 @@ function onWindowResize() {
 
 const genRanHex = size => [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
 
-// Change Model angle
+// Change Model angle, scale, and Scene background
 function animate () {
     if (model) {
         // modify angle
         model.rotation.x += angleX;
         model.rotation.y += angleY;
         model.rotation.z += angleZ;
+        //count++;
 
-        // Modify scale
-        model.scale.x += scaleX;
-        model.scale.y += scaleY;
-        model.scale.z += scaleZ;
+        // Modify scale only every n screenshots
+        if(count > nScreens) {
+            const newScale = scales[Math.floor(Math.random() * scales.length)];
+            model.scale.set(newScale, newScale, newScale);
+            count = 0;
+        }
     }
 
     // Modify background
@@ -199,11 +206,17 @@ function animate () {
     }
     //setBackground(bg);
 
+    const arrZoom = [0.50, 1.00, 1.50];
+    let zoom = arrZoom[Math.floor(Math.random() * arrZoom.length)];
+    //camera.zoom = zoom;
+    //camera.updateProjectionMatrix();
+
     requestAnimationFrame(animate);
 
-    if(takeScreens)
+    if(takeScreens && count < nScreens)
       takeScreenshot(); // TODO: very fast, is right?
     
+    count++;
     render();
 }
 
