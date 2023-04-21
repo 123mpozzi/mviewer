@@ -9,11 +9,12 @@ let camera, scene, renderer;
 let model;
 let textureLoader, hdrLoader;
 
+
 // parameters TODO: ui in HTML (also light?)
 const angleX = 0.00, angleY = 0.02, angleZ = 0.00;
 const scales = [0.50, 1.00, 1.50];  // SMALL, MEDIUM, BIG
-let takeScreens = false;
-const nScreens = 300;
+let takeScreens = true;
+const nScreens = 50;
 let count  = 0;
 //const width = 500, height = 500;
 const size = 500;
@@ -27,7 +28,7 @@ const displayNormals = false;
 init();
 
 
-function init() {
+const init = () => {
     // HTML container element which will contain the generated canvas
     const container = document.createElement( 'div' );
     document.body.appendChild( container );
@@ -48,10 +49,85 @@ function init() {
 
     if(resizeToWindowSize)
         window.addEventListener( 'resize', onWindowResize );
-}
+};
 
 
-function setupScene() {
+const setupGUI = () => {
+    if(dat && model && scene) { // dat gui working
+        const gui = new dat.GUI(); 
+
+        /*const cubeFolder = gui.addFolder('Controls')
+        cubeFolder.add(model.rotation.y, '# Screenshots', 0, 999)
+        cubeFolder.add(model.rotation.x, 'StartAngle', 0, Math.PI * 2)
+        cubeFolder.add(model.rotation.y, 'updates', 0, 999)
+        cubeFolder.add(model.rotation.z, '% change', 0, 100)
+        cubeFolder.open()*/
+        
+        const backgroundFolder  = gui.addFolder('Background');
+        const MIN_DIM = Math.min(window.innerWidth, window.innerHeight);
+        const canvas = renderer.domElement;
+        // look up the size the canvas is being displayed
+        const width = canvas.clientWidth;
+        const height = canvas.clientHeight;
+        const params = {
+            color: '#ffffff',
+        };
+        const sizeParams = {
+            get width(){return width;},
+            set width(newSize) {
+                resizeWindow(newSize, height);
+            },
+            get height(){return height;},
+            set height(newSize) {
+                resizeWindow(width, newSize);
+            }
+        };
+        backgroundFolder.addColor(params, 'color').onChange(function(value) {
+            setBackground(parseInt(value.slice(1), 16)); // #ffffff to 0xffffff (number)
+        });
+        backgroundFolder.add(sizeParams, 'width', 100, window.innerWidth);
+        backgroundFolder.add(sizeParams, 'height', 100, window.innerHeight);
+        backgroundFolder.open();
+
+        const LIMIT = 5;
+        const guiCameraControls = {
+            get aspect(){return camera.aspect;},
+            set aspect(value){
+              camera.aspect = value;
+              camera.updateProjectionMatrix();
+            },
+            get fov(){return camera.fov;},
+            set fov(value){
+              camera.fov = value;
+              camera.updateProjectionMatrix();
+            },
+            get positionX(){return camera.position.x;},
+            set positionX(value){
+              camera.position.x = value;
+              camera.updateMatrixWorld();
+            },
+            get positionY(){return camera.position.y;},
+            set positionY(value){
+              camera.position.y = value;
+              camera.updateMatrixWorld();
+            },
+            get positionZ(){return camera.position.z;},
+            set positionZ(value){
+              camera.position.z = value;
+              camera.updateMatrixWorld();
+            }
+        };
+        const cameraFolder  = gui.addFolder('Camera');
+        cameraFolder.add(guiCameraControls, 'aspect', 0, 4);
+        cameraFolder.add(guiCameraControls, 'fov', 0, 100);
+        cameraFolder.add(guiCameraControls, 'positionX', -LIMIT, LIMIT);
+        cameraFolder.add(guiCameraControls, 'positionY', -LIMIT, LIMIT);
+        cameraFolder.add(guiCameraControls, 'positionZ', -LIMIT, LIMIT);
+        cameraFolder.open()
+    }
+};
+
+const setupScene = () => {
     // Setup camera
     camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.25, 20 );
     camera.position.set( - 1.8, 0.6, 2.7 );
@@ -60,9 +136,9 @@ function setupScene() {
     scene = new THREE.Scene();
     setupEnvironment('royal_esplanade_1k.hdr', useHDRLighting);
     setupModel();
-}
+};
 
-function setupEnvironment( defaultEnv = 'royal_esplanade_1k.hdr', applyEnvLighting = true ) {
+const setupEnvironment = (defaultEnv = 'royal_esplanade_1k.hdr', applyEnvLighting = true) => {
     if(!applyEnvLighting) {  // decent light
         const ambientLight = new THREE.AmbientLight(0xededed, 0.8);
         const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
@@ -75,9 +151,9 @@ function setupEnvironment( defaultEnv = 'royal_esplanade_1k.hdr', applyEnvLighti
 
     loadHdr(defaultEnv, applyEnvLighting);
     //loadHdr('abandoned_tiled_room_1k.hdr', false);
-}
+};
 
-function loadHdr( file, applyLighting = false ) {
+const loadHdr = (file, applyLighting = false) => {
     if(!hdrLoader)
         hdrLoader = new RGBELoader().setPath( 'backgrounds/' );
     
@@ -91,9 +167,9 @@ function loadHdr( file, applyLighting = false ) {
         scene.background = texture;
         texture.dispose();
     } );
-}
+};
 
-function loadTexture( file ) {
+const loadTexture = file => {
     if(!textureLoader)
         textureLoader = new THREE.TextureLoader().setPath( 'backgrounds/' );
     
@@ -101,9 +177,9 @@ function loadTexture( file ) {
         scene.background = texture;
         texture.dispose();
     } );
-}
+};
 
-function setupModel() {
+const setupModel = () => {
     // set path to models folder
     const loader = new GLTFLoader().setPath( 'models/' );
 
@@ -114,12 +190,14 @@ function setupModel() {
 
         if(displayNormals)
             applyNormals(model);
+
+        setupGUI();
         
         animate();
     } );
-}
+};
 
-function setupRenderer() {
+const setupRenderer = () => {
     // Init renderer
     renderer = new THREE.WebGLRenderer( { antialias: true, preserveDrawingBuffer: true } );
     renderer.setPixelRatio( window.devicePixelRatio );
@@ -136,12 +214,12 @@ function setupRenderer() {
     renderer.outputEncoding = THREE.sRGBEncoding;
 
     return renderer;
-}
+};
 
 
 // background either string: 'image1.png', 'image2.hdr', or hex: 0xFFFFFF, 0xEDEDED
 // TODO: also gradients (maybe can do them with lighting?)
-function setBackground( background ) {
+const setBackground = background => {
     if(scene.background == background)
         return;
 
@@ -159,27 +237,27 @@ function setBackground( background ) {
     catch {
         scene.background = new THREE.Color(background);
     }    
-}
+};
 
-function resizeWindow( height, width ) {
+const resizeWindow = (width, height) => {
     //const RAD2DEG = 114.59155902616465;
     //camera.fov = Math.atan(window.innerHeight / 2 / camera.position.z) * 2 * RAD2DEG;
     //camera.position.z = 50;
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
-    renderer.setSize( height, width );
-}
+    renderer.setSize( width, height );
+};
 
-function onWindowResize() {
+const onWindowResize = () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize( window.innerWidth, window.innerHeight );
-}
+};
 
 const genRanHex = size => [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
 
 // Change Model angle, scale, and Scene background
-function animate () {
+const animate = () => {
     if (model) {
         // modify angle
         model.rotation.x += angleX;
@@ -218,15 +296,15 @@ function animate () {
     
     count++;
     render();
-}
+};
 
-function render() {
+const render = () => {
     renderer.render( scene, camera );
-}
+};
 
 // Take and send a screenshot to the server
 // TODO: pack N screens?
-function takeScreenshot() {
+const takeScreenshot = () => {
     const debug = false;
     var imgData;
 
@@ -254,15 +332,15 @@ function takeScreenshot() {
         console.log(e);
         return;
     }
-}
+};
 
 // Apply to the model its normal map, to visualize it
 // Useful when model is not rendering correctly (eg. transparency)
-function applyNormals( model ) {
+const applyNormals = model => {
     if ( model ) {
         model.traverse((o) => {
             //if(o.isMesh) console.log(o); // debug
             if(o.isMesh) o.material = new THREE.MeshNormalMaterial;
         });
     }
-}
+};

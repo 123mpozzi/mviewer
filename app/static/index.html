@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang=”en”>
+<head>    
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My First three.js Project</title>
+    <link type="text/css" href="style.css">
+    <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js" integrity="sha512-LF8ZB1iTwi4Qvkm4pekHG4a437Y9Af5ZuwbnW4GTbAWQeR2E4KW8WF+xH8b9psevV7wIlDMx1MH9YfPqgKhA/Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.151.3/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.151.3/examples/jsm/"
+        }
+      }
+    </script>
+</head>
+<body>
+    <!--<form action="http://localhost:8000/uploader" method="POST" enctype="multipart/form-data">
+        <input type="file" name="file" />
+        <input type="submit"/>
+     </form>
+    <form action="http://localhost:8000/controls" method="POST" enctype="multipart/form-data">
+      <label for="angleStart">Starting Angle:</label>
+      <input type="angleStart" id="quantity" name="quantity" min="1" max="360">
+      <label for="angleUpdate">Angle update %:</label>
+      <input type="angleUpdate" id="quantity" name="quantity" min="1" max="100">
+      <label for="bgUpdate">Background update %:</label>
+      <input type="bgUpdate" id="quantity" name="quantity" min="1" max="100">
+      <input type="submit"/>
+    </form>-->
+    <!--  This line imports our javascript code from our /js directory -->
+    <script type="module" src="script.js"></script>
+</body>
+</html>
