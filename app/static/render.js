@@ -1,16 +1,7 @@
-import {
-  THREE,
-  OrbitControls,
-  PARAMS,
-  main,
-  setBackground,
-  setupScene
-} from './script.js'
+import { THREE, OrbitControls, PARAMS, main, setBackground, setupScene } from './script.js'
 
 const onWindowResize = () => {
-  main.camera.aspect = window.innerWidth / window.innerHeight
-  main.camera.updateProjectionMatrix()
-  main.renderer.setSize(window.innerWidth, window.innerHeight)
+  resizeWindow(window.innerWidth, window.innerHeight)
 }
 
 export const resizeWindow = (width, height) => {
@@ -41,8 +32,7 @@ export const init = () => {
   controls.target.set(0, 0, -0.2)
   controls.update()
 
-  if (PARAMS.resizeToWindowSize)
-    window.addEventListener('resize', onWindowResize)
+  if (PARAMS.resizeToWindowSize) window.addEventListener('resize', onWindowResize)
 }
 
 const setupRenderer = () => {
@@ -54,9 +44,8 @@ const setupRenderer = () => {
   main.renderer.setPixelRatio(window.devicePixelRatio)
 
   // Set canvas size
-  if (PARAMS.resizeToWindowSize)
-    main.renderer.setSize(window.innerWidth, window.innerHeight)
-  else resizeWindow(PARAMS.size, PARAMS.size)
+  if (PARAMS.resizeToWindowSize) main.renderer.setSize(window.innerWidth, window.innerHeight)
+  else resizeWindow(PARAMS.width, PARAMS.height)
 
   // for better rendering effects
   main.renderer.toneMapping = THREE.ACESFilmicToneMapping
@@ -64,10 +53,7 @@ const setupRenderer = () => {
   main.renderer.outputEncoding = THREE.sRGBEncoding
 }
 
-const genRanHex = size =>
-  [...Array(size)]
-    .map(() => Math.floor(Math.random() * 16).toString(16))
-    .join('')
+const genRanHex = size => [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('')
 
 // Take and send a screenshot to the server
 // TODO: pack N screens and zip/pack them?
@@ -115,8 +101,7 @@ export const animate = () => {
 
     // Modify scale only every n screenshots
     if (PARAMS.count > PARAMS.nScreens) {
-      const newScale =
-        PARAMS.scales[Math.floor(Math.random() * PARAMS.scales.length)]
+      const newScale = PARAMS.scales[Math.floor(Math.random() * PARAMS.scales.length)]
       main.model.scale.set(newScale, newScale, newScale)
       PARAMS.count = 0
     }
@@ -128,11 +113,7 @@ export const animate = () => {
   } else {
     // Use a texture
     // TODO: GET backgrounds from fastAPI and randomize
-    const arr = [
-      'sky.jpg',
-      'royal_esplanade_1k.hdr',
-      'abandoned_tiled_room_1k.hdr'
-    ]
+    const arr = ['sky.jpg', 'royal_esplanade_1k.hdr', 'abandoned_tiled_room_1k.hdr']
     PARAMS.bg = arr[Math.floor(Math.random() * arr.length)]
   }
   if (PARAMS.randomBackground) setBackground(PARAMS.bg)
