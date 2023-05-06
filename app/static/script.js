@@ -25,6 +25,7 @@ export const PARAMS = {
     angleY: 0.02,
     angleZ: 0,
     scales: [0.5, 1.0, 1.5],
+    defaultBackground: 'royal_esplanade_1k.hdr',
     randomBackground: false,
     takeScreens: false,
     /**
