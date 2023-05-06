@@ -52,7 +52,7 @@ const loadTexture = file => {
 
 // Apply to the model its normal map, to visualize it
 // Useful when model is not rendering correctly (eg. transparency)
-const applyNormals = model => {
+export const applyNormals = model => {
   if (model) {
     model.traverse(o => {
       //if(o.isMesh) console.log(o); // debug
@@ -80,9 +80,9 @@ const setupModel = () => {
 // background either string: 'image1.png', 'image2.hdr', or hex: 0xFFFFFF, 0xEDEDED
 // TODO: also gradients (maybe can do them with lighting?--)
 export const setBackground = background => {
-  if (main.scene.background === background)
-    // continue if same background
-    return
+  //if (main.scene.background === background)
+  //  // continue if same background
+  //  return
 
   // Try setting a file as background
   try {

@@ -11,8 +11,10 @@ export const setupGUI = () => {
     let canvasDefaults
     const canvasParams = {
       background: '#ffffff',
-      width: canvas.clientWidth,
-      height: canvas.clientHeight,
+      width: PARAMS.width,
+      height: PARAMS.height,
+      useHDRLighting: PARAMS.useHDRLighting,
+      randomBackground: PARAMS.randomBackground,
       reset: () => {
         resetParameters(canvasParams, canvasDefaults)
         updateCanvas(canvasParams)
@@ -22,6 +24,11 @@ export const setupGUI = () => {
     const canvasBackground = canvasFolder.addColor(canvasParams, 'background').listen()
     const canvasWidth = canvasFolder.add(canvasParams, 'width').min(100).max(window.innerWidth).listen()
     const canvasHeight = canvasFolder.add(canvasParams, 'height').min(100).max(window.innerHeight).listen()
+    const canvasHDRLighting = canvasFolder.add(canvasParams, 'useHDRLighting').name('Env. lighting?').listen()
+    const canvasRandomBackground = canvasFolder
+      .add(canvasParams, 'randomBackground')
+      .name('Random bg?')
+      .listen()
     canvasFolder.add(canvasParams, 'reset').name('Reset Canvas')
     canvasFolder.open()
     // listeners
@@ -34,6 +41,63 @@ export const setupGUI = () => {
     canvasHeight.onChange(function (value) {
       resizeWindow(canvas.clientWidth, value)
     })
+    canvasHDRLighting.onChange(function (value) {
+      if (PARAMS.useHDRLighting !== value) PARAMS.useHDRLighting = value    // TODO: not working, maybe is setupEnvironment?
+    })
+    canvasRandomBackground.onChange(function (value) {
+      if (PARAMS.randomBackground !== value) PARAMS.randomBackground = value
+    })
+
+
+    // Add Folder for Model settings
+    const modelFolder = gui.addFolder('Model')
+    let modelDefaults
+    const modelParams = {
+        angleX: PARAMS.angleX,
+        angleY: PARAMS.angleY,
+        angleZ: PARAMS.angleZ,
+        scaleSmall: PARAMS.scales[0],
+        scaleMed: PARAMS.scales[1], 
+        scaleBig: PARAMS.scales[2],
+        displayNormals: PARAMS.displayNormals,
+      reset: () => {
+        resetParameters(modelParams, modelDefaults)
+        updateModel(modelParams)
+      }
+    }
+    modelDefaults = Object.assign({}, modelParams)
+    const modelAngleX = modelFolder.add(modelParams, 'angleX').min(0.0).max(1.0).listen()
+    const modelAngleY = modelFolder.add(modelParams, 'angleY').min(0.0).max(1.0).listen()
+    const modelAngleZ = modelFolder.add(modelParams, 'angleZ').min(0.0).max(1.0).listen()
+    const modelScaleSmall = modelFolder.add(modelParams, 'scaleSmall').min(0.0).max(2.0).listen()
+    const modelScaleMed = modelFolder.add(modelParams, 'scaleMed').min(0.0).max(3.0).listen()
+    const modelScaleBig = modelFolder.add(modelParams, 'scaleBig').min(0.0).max(5.0).listen()
+    const modelDisplayNormals = modelFolder.add(modelParams, 'displayNormals').name('Show normals?').listen()
+    modelFolder.add(modelParams, 'reset').name('Reset Model')
+    modelFolder.open()
+    // listeners
+    modelAngleX.onChange(function (value) {
+        PARAMS.angleX = value
+    })
+    modelAngleY.onChange(function (value) {
+        PARAMS.angleY = value
+    })
+    modelAngleZ.onChange(function (value) {
+        PARAMS.angleZ = value
+    })
+    modelScaleSmall.onChange(function (value) {
+        PARAMS.scales[0] = value
+    })
+    modelScaleMed.onChange(function (value) {
+        PARAMS.scales[1] = value
+    })
+    modelScaleBig.onChange(function (value) {
+        PARAMS.scales[2] = value
+    })
+    modelDisplayNormals.onChange(function (value) {
+        if (PARAMS.displayNormals !== value) PARAMS.displayNormals = value  // TODO
+      })
+
 
     // Add Folder for Camera settings
     const LIMIT = 2.5
@@ -95,7 +159,10 @@ const resetParameters = (current, defaults) => {
 const updateCanvas = params => {
   resizeWindow(params['width'], params['height'])
   console.log(PARAMS.defaultBackground)
-  //setBackground(PARAMS.defaultBackground); // TODO: fix: only the background is not being reset
+  setBackground(PARAMS.defaultBackground); // TODO: fix: only the background is not being reset
+}
+
+const updateModel = params => {
 }
 
 /** Apply given parameters to camera */

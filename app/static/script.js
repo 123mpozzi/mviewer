@@ -11,7 +11,7 @@ let bg = 0xff0000 // TODO: option flag to 'apply lights' if HDR
 const useHDRLighting = true
 
 
-// TODO: most of these settings should be possible to change in the GUI, eg: takeScreens, nScreens, scales and angles, randomBackground, HDRlighting, displayNormals
+// TODO: most of these settings should be possible to change in the GUI, eg: takeScreens, nScreens, scales and angles, displayNormals
 
 */
 
