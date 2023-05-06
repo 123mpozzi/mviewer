@@ -13,15 +13,13 @@ export const setupScene = () => {
 };
 
 const setupEnvironment = (defaultEnv = 'royal_esplanade_1k.hdr', applyEnvLighting = true) => {
-    if(!applyEnvLighting) {  // decent light
+    if(!applyEnvLighting) {  // setup decent light if not getting it from environment
         const ambientLight = new THREE.AmbientLight(0xededed, 0.8);
         const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-        scene.add(ambientLight);
-        scene.add(directionalLight);
+        main.scene.add(ambientLight);
+        main.scene.add(directionalLight);
         directionalLight.position.set(10, 11, 7);
     }
-
-    main.hdrLoader = new RGBELoader().setPath( 'backgrounds/' );
 
     loadHdr(defaultEnv, applyEnvLighting);
     //loadHdr('abandoned_tiled_room_1k.hdr', false);
@@ -32,9 +30,9 @@ const loadHdr = (file, applyLighting = false) => {
         main.hdrLoader = new RGBELoader().setPath( 'backgrounds/' );
     
     main.hdrLoader.load( file, function ( texture ) {  // handle HDR environments
-        texture.mapping = THREE.EquirectangularReflectionMapping; // map spheric texture to scene
+        texture.mapping = THREE.EquirectangularReflectionMapping;  // map spheric texture to scene
 
-        // apply good lighting (default is taken from royal_esplanade_1k.hdr)
+        // Apply good lighting (default is taken from royal_esplanade_1k.hdr)
         if(applyLighting)
             main.scene.environment = texture;
         
@@ -77,7 +75,6 @@ const setupModel = () => {
             applyNormals(main.model);
 
         setupGUI();
-        
         animate();
     } );
 };

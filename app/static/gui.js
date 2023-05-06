@@ -1,5 +1,6 @@
 import { main, resizeWindow, setBackground } from './script.js'
 
+
 export const setupGUI = () => {
   // Once the dat.GUI library is loaded, you can access it via window.dat or simply dat
   if (dat && main.model && main.scene) {
@@ -12,35 +13,30 @@ export const setupGUI = () => {
         cubeFolder.add(model.rotation.z, '% change', 0, 100)
         cubeFolder.open()*/
 
-    const backgroundFolder = gui.addFolder('Background')
+    const canvasFolder = gui.addFolder('Canvas')
     const MIN_DIM = Math.min(window.innerWidth, window.innerHeight)
     const canvas = main.renderer.domElement
     // look up the size the canvas is being displayed
     const width = canvas.clientWidth
     const height = canvas.clientHeight
     const params = {
-      color: '#ffffff'
+      background: '#ffffff'
     }
     const sizeParams = {
-      get width () {
-        return width
-      },
-      set width (newSize) {
-        resizeWindow(newSize, height)
-      },
-      get height () {
-        return height
-      },
-      set height (newSize) {
-        resizeWindow(width, newSize)
-      }
+      width: canvas.clientWidth,
+      height: canvas.clientHeight
     }
-    backgroundFolder.addColor(params, 'color').onChange(function (value) {
+    canvasFolder.addColor(params, 'background').onChange(function (value) {
       setBackground(parseInt(value.slice(1), 16)) // #ffffff to 0xffffff (number)
     })
-    backgroundFolder.add(sizeParams, 'width', 100, window.innerWidth)
-    backgroundFolder.add(sizeParams, 'height', 100, window.innerHeight)
-    backgroundFolder.open()
+    const test = canvasFolder.add(sizeParams, 'width').min(100).max(window.innerWidth).listen();
+    const testA = canvasFolder.add(sizeParams, 'height').min(100).max(window.innerHeight).listen();
+    canvasFolder.open()
+
+    test.onChange(function(value) 
+	{   resizeWindow(value, canvas.clientHeight)   });
+    testA.onChange(function(value) 
+	{   resizeWindow(canvas.clientWidth, value)   });
 
     const LIMIT = 5
     const guiCameraControls = {

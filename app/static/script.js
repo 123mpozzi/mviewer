@@ -25,6 +25,7 @@ export const PARAMS = {
     angleY: 0.02,
     angleZ: 0,
     scales: [0.5, 1.0, 1.5],
+    randomBackground: false,
     takeScreens: false,
     /**
      * Model scale will change after this number of screenshots
