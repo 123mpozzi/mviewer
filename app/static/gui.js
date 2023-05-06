@@ -15,7 +15,10 @@ export const setupGUI = () => {
         background: '#ffffff',
         width: canvas.clientWidth,
         height: canvas.clientHeight,
-        reset: function() { resetCanvas(canvasParams, canvasDefaults) }
+        reset: () => {
+            resetParameters(canvasParams, canvasDefaults);
+            updateCanvas(canvasParams);
+        }
     }
     canvasDefaults = Object.assign({}, canvasParams);
     const canvasBackground = canvasFolder.addColor(canvasParams, 'background').listen();
@@ -34,7 +37,7 @@ export const setupGUI = () => {
 
 
     // Add Folder for Camera settings
-    const LIMIT = 5
+    const LIMIT = 2.5
     let cameraDefaults;
     const cameraParams = {
       aspect: main.camera.aspect,
@@ -42,12 +45,15 @@ export const setupGUI = () => {
       positionX: main.camera.position.x,
       positionY: main.camera.position.y,
       positionZ: main.camera.position.z,
-      reset: function() { resetCamera(cameraParams, cameraDefaults) }
+      reset: () => {
+          resetParameters(cameraParams, cameraDefaults)
+          updateCamera(cameraParams)
+      }
     }
     cameraDefaults = Object.assign({}, cameraParams);
     const cameraFolder = gui.addFolder('Camera')
-    const cameraAspect = cameraFolder.add(cameraParams, 'aspect', 0, 4).listen();
-    const cameraFov = cameraFolder.add(cameraParams, 'fov', 0, 100).listen();
+    const cameraAspect = cameraFolder.add(cameraParams, 'aspect', 0.5, 4).listen();
+    const cameraFov = cameraFolder.add(cameraParams, 'fov', 10, 100).listen();
     const cameraX = cameraFolder.add(cameraParams, 'positionX', -LIMIT, LIMIT).listen();
     const cameraY = cameraFolder.add(cameraParams, 'positionY', -LIMIT, LIMIT).listen();
     const cameraZ = cameraFolder.add(cameraParams, 'positionZ', -LIMIT, LIMIT).listen();
@@ -79,23 +85,28 @@ export const setupGUI = () => {
   }
 }
 
-const resetCanvas = (current, defaults) => {
+/** Reset parameters to default values */
+const resetParameters = (current, defaults) => {
     if(!current || !defaults)
         return;
 
     for(const key in current)
         current[key] = defaults[key];
-    resizeWindow(current['width'], current['height'])
-    console.log(PARAMS.defaultBackground)
-    //setBackground(PARAMS.defaultBackground); // TODO: fix
 };
 
-const resetCamera = (current, defaults) => {
-    if(!current || !defaults)
-        return;
+/** Apply given parameters to canvas */
+const updateCanvas = params => {
+    resizeWindow(params['width'], params['height'])
+    console.log(PARAMS.defaultBackground)
+    //setBackground(PARAMS.defaultBackground); // TODO: fix: only the background is not being reset
+};
 
-    for(const key in current)
-        current[key] = defaults[key];
-    
-    main.camera.updateProjectionMatrix() // TODO: fix
+/** Apply given parameters to camera */
+const updateCamera = params => {
+    main.camera.aspect = params.aspect
+    main.camera.fov = params.fov
+    main.camera.position.x = params.positionX
+    main.camera.position.y = params.positionY
+    main.camera.position.z = params.positionZ
+    main.camera.updateProjectionMatrix()
 };
