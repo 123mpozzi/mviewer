@@ -58,7 +58,6 @@ export const setupGUI = () => {
       scaleSmall: PARAMS.scales[0],
       scaleMed: PARAMS.scales[1],
       scaleBig: PARAMS.scales[2],
-      displayNormals: PARAMS.displayNormals,
       reset: () => {
         resetParameters(modelParams, modelDefaults)
         updateModel(modelParams)
@@ -71,7 +70,6 @@ export const setupGUI = () => {
     const modelScaleSmall = modelFolder.add(modelParams, 'scaleSmall').min(0.0).max(2.0).listen()
     const modelScaleMed = modelFolder.add(modelParams, 'scaleMed').min(0.0).max(3.0).listen()
     const modelScaleBig = modelFolder.add(modelParams, 'scaleBig').min(0.0).max(5.0).listen()
-    const modelDisplayNormals = modelFolder.add(modelParams, 'displayNormals').name('Show normals?').listen()
     modelFolder.add(modelParams, 'reset').name('Reset Model')
     modelFolder.open()
     // listeners
@@ -92,9 +90,6 @@ export const setupGUI = () => {
     })
     modelScaleBig.onChange(function (value) {
       PARAMS.scales[2] = value
-    })
-    modelDisplayNormals.onChange(function (value) {
-      if (PARAMS.displayNormals !== value) PARAMS.displayNormals = value // TODO
     })
 
     // Add Folder for Camera settings
@@ -119,7 +114,6 @@ export const setupGUI = () => {
     const cameraY = cameraFolder.add(cameraParams, 'positionY', -LIMIT, LIMIT).listen()
     const cameraZ = cameraFolder.add(cameraParams, 'positionZ', -LIMIT, LIMIT).listen()
     cameraFolder.add(cameraParams, 'reset').name('Reset Camera')
-    cameraFolder.open()
     // listeners
     cameraAspect.onChange(function (value) {
       main.camera.aspect = value
@@ -140,6 +134,17 @@ export const setupGUI = () => {
     cameraZ.onChange(function (value) {
       main.camera.position.z = value
       main.camera.updateProjectionMatrix()
+    })
+
+    // Add Folder for Debug
+    const debugParams = {
+      displayNormals: PARAMS.displayNormals,
+    }
+    const debugFolder = gui.addFolder('Debug')
+    const debugNormals = debugFolder.add(debugParams, 'displayNormals').name('Apply normals?').listen()
+    // listeners
+    debugNormals.onChange(function (value) {
+      if (PARAMS.displayNormals !== value) PARAMS.displayNormals = value // TODO
     })
   } else {
     console.error('dat.GUI library not loaded')

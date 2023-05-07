@@ -49,7 +49,7 @@ const setupRenderer = () => {
   // for better rendering effects
   main.renderer.toneMapping = THREE.ACESFilmicToneMapping
   main.renderer.toneMappingExposure = 4
-  main.renderer.outputEncoding = THREE.sRGBEncoding
+  main.renderer.outputColorSpace = THREE.SRGBColorSpace
 }
 
 const genRanHex = size => [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('')

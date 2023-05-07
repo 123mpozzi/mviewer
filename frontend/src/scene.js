@@ -1,5 +1,8 @@
 import { THREE, GLTFLoader, RGBELoader, main, PARAMS, setupGUI, animate } from './script.js'
 
+const DEFAULT_BACKGROUNDS_DIR = 'static/backgrounds/'
+const DEFAULT_MODELS_DIR = 'static/models/'
+
 export const setupScene = () => {
   // Setup camera
   main.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.25, 20)
@@ -26,7 +29,7 @@ const setupEnvironment = (defaultEnv = 'royal_esplanade_1k.hdr', applyEnvLightin
 }
 
 const loadHdr = (file, applyLighting = false) => {
-  if (!main.hdrLoader) main.hdrLoader = new RGBELoader().setPath('backgrounds/')
+  if (!main.hdrLoader) main.hdrLoader = new RGBELoader().setPath(DEFAULT_BACKGROUNDS_DIR)
 
   main.hdrLoader.load(file, function (texture) {
     // handle HDR environments
@@ -41,7 +44,7 @@ const loadHdr = (file, applyLighting = false) => {
 }
 
 const loadTexture = file => {
-  if (!main.textureLoader) main.textureLoader = new THREE.TextureLoader().setPath('backgrounds/')
+  if (!main.textureLoader) main.textureLoader = new THREE.TextureLoader().setPath(DEFAULT_BACKGROUNDS_DIR)
 
   main.textureLoader.load(file, function (texture) {
     // handle img backgrounds
@@ -63,7 +66,7 @@ export const applyNormals = model => {
 
 const setupModel = () => {
   // set path to models folder
-  const loader = new GLTFLoader().setPath('models/')
+  const loader = new GLTFLoader().setPath(DEFAULT_MODELS_DIR)
 
   // Add GLTF model
   loader.load('ring_gold_with_diamond.glb', function (gltf) {
