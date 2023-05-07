@@ -5,14 +5,18 @@
   "main": "./src/script.js",
   "scripts": {
     "lint": "eslint --ext .js ./src",
-    "format": "prettier --ignore-path .gitignore package-lock.json --write \"**/*.+(js|ts|json)\"",
+    "format": "prettier --ignore-path .gitignore package-lock.json --write \"**/*.+(js|json)\"",
+    "build": "npx vite build",
+    "dev": "npx vite dev",
+    "preview": "npx vite preview",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Michele Pozzi",
   "license": "MIT",
   "dependencies": {
     "dat.gui": "^0.7.9",
-    "three": "^0.152.2"
+    "three": "^0.152.2",
+    "vite": "^4.3.5"
   },
   "devDependencies": {
     "@babel/core": "^7.21.8",
