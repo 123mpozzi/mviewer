@@ -1,4 +1,4 @@
-import { main, resizeWindow, setBackground, PARAMS } from './script.js'
+import { main, resizeWindow, setBackground, PARAMS, dat } from './script.js'
 
 export const setupGUI = () => {
   // Once the dat.GUI library is loaded, you can access it via window.dat or simply dat
@@ -42,24 +42,23 @@ export const setupGUI = () => {
       resizeWindow(canvas.clientWidth, value)
     })
     canvasHDRLighting.onChange(function (value) {
-      if (PARAMS.useHDRLighting !== value) PARAMS.useHDRLighting = value    // TODO: not working, maybe is setupEnvironment?
+      if (PARAMS.useHDRLighting !== value) PARAMS.useHDRLighting = value // TODO: not working, maybe is setupEnvironment?
     })
     canvasRandomBackground.onChange(function (value) {
       if (PARAMS.randomBackground !== value) PARAMS.randomBackground = value
     })
 
-
     // Add Folder for Model settings
     const modelFolder = gui.addFolder('Model')
     let modelDefaults
     const modelParams = {
-        angleX: PARAMS.angleX,
-        angleY: PARAMS.angleY,
-        angleZ: PARAMS.angleZ,
-        scaleSmall: PARAMS.scales[0],
-        scaleMed: PARAMS.scales[1], 
-        scaleBig: PARAMS.scales[2],
-        displayNormals: PARAMS.displayNormals,
+      angleX: PARAMS.angleX,
+      angleY: PARAMS.angleY,
+      angleZ: PARAMS.angleZ,
+      scaleSmall: PARAMS.scales[0],
+      scaleMed: PARAMS.scales[1],
+      scaleBig: PARAMS.scales[2],
+      displayNormals: PARAMS.displayNormals,
       reset: () => {
         resetParameters(modelParams, modelDefaults)
         updateModel(modelParams)
@@ -77,27 +76,26 @@ export const setupGUI = () => {
     modelFolder.open()
     // listeners
     modelAngleX.onChange(function (value) {
-        PARAMS.angleX = value
+      PARAMS.angleX = value
     })
     modelAngleY.onChange(function (value) {
-        PARAMS.angleY = value
+      PARAMS.angleY = value
     })
     modelAngleZ.onChange(function (value) {
-        PARAMS.angleZ = value
+      PARAMS.angleZ = value
     })
     modelScaleSmall.onChange(function (value) {
-        PARAMS.scales[0] = value
+      PARAMS.scales[0] = value
     })
     modelScaleMed.onChange(function (value) {
-        PARAMS.scales[1] = value
+      PARAMS.scales[1] = value
     })
     modelScaleBig.onChange(function (value) {
-        PARAMS.scales[2] = value
+      PARAMS.scales[2] = value
     })
     modelDisplayNormals.onChange(function (value) {
-        if (PARAMS.displayNormals !== value) PARAMS.displayNormals = value  // TODO
-      })
-
+      if (PARAMS.displayNormals !== value) PARAMS.displayNormals = value // TODO
+    })
 
     // Add Folder for Camera settings
     const LIMIT = 2.5
@@ -159,11 +157,10 @@ const resetParameters = (current, defaults) => {
 const updateCanvas = params => {
   resizeWindow(params['width'], params['height'])
   console.log(PARAMS.defaultBackground)
-  setBackground(PARAMS.defaultBackground); // TODO: fix: only the background is not being reset
+  setBackground(PARAMS.defaultBackground) // TODO: fix: only the background is not being reset
 }
 
-const updateModel = params => {
-}
+const updateModel = params => {}
 
 /** Apply given parameters to camera */
 const updateCamera = params => {

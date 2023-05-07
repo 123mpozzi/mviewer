@@ -43,40 +43,40 @@ export const PARAMS = {
 
 var camera, scene, renderer, model, textureLoader, hdrLoader
 export const main = {
-  get camera () {
+  get camera() {
     return camera
   },
-  set camera (value) {
+  set camera(value) {
     camera = value
   },
-  get scene () {
+  get scene() {
     return scene
   },
-  set scene (value) {
+  set scene(value) {
     scene = value
   },
-  get renderer () {
+  get renderer() {
     return renderer
   },
-  set renderer (value) {
+  set renderer(value) {
     renderer = value
   },
-  get model () {
+  get model() {
     return model
   },
-  set model (value) {
+  set model(value) {
     model = value
   },
-  get textureLoader () {
+  get textureLoader() {
     return textureLoader
   },
-  set textureLoader (value) {
+  set textureLoader(value) {
     textureLoader = value
   },
-  get hdrLoader () {
+  get hdrLoader() {
     return hdrLoader
   },
-  set hdrLoader (value) {
+  set hdrLoader(value) {
     hdrLoader = value
   }
 }
@@ -88,6 +88,8 @@ export * as THREE from 'three'
 export { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 export { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 export { RGBELoader } from 'three/addons/loaders/RGBELoader.js'
+
+export * as dat from 'dat.gui'
 
 export * from './render.js'
 export * from './scene.js'

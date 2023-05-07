@@ -1,14 +1,14 @@
-// .eslintrc.js example
+// eslint-disable-next-line no-undef
 module.exports = {
-    "env": {
-        "browser": true,
-        "es2021": true
-    },
-    "extends": "eslint:recommended",
-    "parser": '@babel/eslint-parser',
-    "parserOptions": {
-        "requireConfigFile": false,
-        "ecmaVersion": "latest",
-        "sourceType": "module"
-    },
+  env: {
+    browser: true,
+    es2021: true
+  },
+  extends: ['eslint:recommended', 'prettier'],
+  parser: '@babel/eslint-parser',
+  parserOptions: {
+    requireConfigFile: false,
+    ecmaVersion: 'latest',
+    sourceType: 'module'
   }
+}

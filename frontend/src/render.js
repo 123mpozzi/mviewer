@@ -1,6 +1,5 @@
 import { THREE, OrbitControls, PARAMS, main, setBackground, setupScene, applyNormals } from './script.js'
 
-
 const onWindowResize = () => {
   resizeWindow(window.innerWidth, window.innerHeight)
 }
@@ -108,8 +107,8 @@ export const animate = () => {
     }
 
     if (PARAMS.displayNormals) {
-        applyNormals(main.model) // TODO: works, but then cannot set it back!
-    } 
+      applyNormals(main.model) // TODO: works, but then cannot set it back!
+    }
   }
 
   // Modify background
