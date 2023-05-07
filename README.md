@@ -1,3 +1,17 @@
+## Setup
+
+
+Build the application via docker-compose:
+`docker-compose up --build`
+
+Now the application is running by default at:
+`http://127.0.0.1:8080/index.html`
+
+
+
+
+# -- Old
+
 ## Setup with Docker
 
 Build the image:

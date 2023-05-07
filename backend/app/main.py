@@ -12,8 +12,9 @@ import shutil, time, base64, json
 
 app = FastAPI()
 
-origins = ["*"]
 
+# Setup CORS
+origins = ["*"]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -22,8 +23,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# Mount the dir "app/static" and assign it the name "static" to use internally
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 templates = Jinja2Templates(directory="templates")
 @app.get("/upload/", response_class=HTMLResponse)

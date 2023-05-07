@@ -1,9 +1,5 @@
 import { THREE, OrbitControls, PARAMS, main, setBackground, setupScene, applyNormals } from './script.js'
 
-const onWindowResize = () => {
-  resizeWindow(window.innerWidth, window.innerHeight)
-}
-
 export const resizeWindow = (width, height) => {
   //const RAD2DEG = 114.59155902616465;
   //camera.fov = Math.atan(window.innerHeight / 2 / camera.position.z) * 2 * RAD2DEG;
@@ -32,7 +28,10 @@ export const init = () => {
   controls.target.set(0, 0, -0.2)
   controls.update()
 
-  if (PARAMS.resizeToWindowSize) window.addEventListener('resize', onWindowResize)
+  if (PARAMS.resizeToWindowSize)
+    window.addEventListener('resize', () => {
+      resizeWindow(this.innerWidth, this.innerHeight)
+    })
 }
 
 const setupRenderer = () => {

@@ -18,6 +18,11 @@ venv/scripts/activate
 pip install -r ..\requirements.txt
 ```
 
+Try building with Docker
+```bash
+docker build .
+```
+
 
 
 ## Running 

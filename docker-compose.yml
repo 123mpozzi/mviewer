@@ -4,7 +4,7 @@ services:
 
   backend:
     build: ./backend
-    command: uvicorn app.main:app --root-path /api --proxy-headers --host 0.0.0.0 --port 8000
+    command: uvicorn app.main:app --root-path /api --proxy-headers --host 127.0.0.1 --port 8000
 
   frontend:
     build: ./frontend
