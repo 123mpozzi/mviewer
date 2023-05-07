@@ -1,7 +1,8 @@
 import { THREE, GLTFLoader, RGBELoader, main, PARAMS, setupGUI, animate } from './script.js'
 
-const DEFAULT_BACKGROUNDS_DIR = 'static/backgrounds/'
-const DEFAULT_MODELS_DIR = 'static/models/'
+// Vite copies 'public' directory to root dist directory by default
+const DEFAULT_BACKGROUNDS_DIR = 'backgrounds/'
+const DEFAULT_MODELS_DIR = 'models/'
 
 export const setupScene = () => {
   // Setup camera
