@@ -1,10 +1,11 @@
 # Build step #1: build the node front end
-FROM tiangolo/node-frontend:10 as build-step
+FROM node:lts-alpine as build-step
 WORKDIR /app
 ENV PATH /app/node_modules/.bin:$PATH
 COPY package.json  ./
+COPY index.html ./index.html
 COPY ./src ./src
-COPY ./public ./public
+#COPY ./public ./public
 RUN npm install
 RUN npm run build
 
@@ -12,4 +13,4 @@ RUN npm run build
 FROM caddy:alpine
 EXPOSE 80
 EXPOSE 443
-COPY --from=build-step /app/build /usr/share/caddy
+COPY --from=build-step /app/dist /usr/share/caddy
