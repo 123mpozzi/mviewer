@@ -1,22 +1,6 @@
-import { THREE, GLTFLoader, main } from './script.js'
+import { THREE, GLTFLoader, DRACOLoader, RGBELoader, main, PARAMS, setupGUI, animate } from './script.js'
 
-export const setupDropArea = () => {
-  document.addEventListener('drop', function (event) {
-    event.preventDefault()
-
-    if (event.dataTransfer.types[0] === 'text/plain') return // Outliner drop
-
-    loadFile(event.dataTransfer.files)
-    /*if (event.dataTransfer.items) {
-        // DataTransferItemList supports folders
-        editor.loader.loadItemList(event.dataTransfer.items)
-      } else {
-        editor.loader.loadFiles(event.dataTransfer.files)
-      }*/
-  })
-}
-
-export const loadFile = file => {
+const loadFile = (file, manager) => {
   const filename = file.name
   const extension = filename.split('.').pop().toLowerCase()
 
@@ -55,14 +39,17 @@ export const loadFile = file => {
         async function (event) {
           const contents = event.target.result
 
+          const dracoLoader = new DRACOLoader()
+          dracoLoader.setDecoderPath('../examples/js/libs/draco/gltf/')
+
           const loader = new GLTFLoader()
-          // https://threejs.org/docs/#examples/en/loaders/GLTFLoader.parse
-          // .parse ( data : ArrayBuffer, path : String, onLoad : Function, onError : Function ) : undefined
+          loader.setDRACOLoader(dracoLoader)
           loader.parse(contents, '', function (result) {
-            main.model = result.scene
-            main.model.name = filename
-            main.model.animations.push(...result.animations)
-            main.scene.add(main.model)
+            const scene = result.scene
+            scene.name = filename
+
+            scene.animations.push(...result.animations)
+            editor.execute(new AddObjectCommand(editor, scene))
           })
         },
         false
@@ -78,18 +65,26 @@ export const loadFile = file => {
         async function (event) {
           const contents = event.target.result
 
+          let loader
+
           if (isGLTF1(contents)) {
             alert(
               'Import of glTF asset not possible. Only versions >= 2.0 are supported. Please try to upgrade the file to glTF 2.0 using glTF-Pipeline.'
             )
+          } else {
+            const dracoLoader = new DRACOLoader()
+            dracoLoader.setDecoderPath('../examples/js/libs/draco/gltf/')
+
+            loader = new GLTFLoader(manager)
+            loader.setDRACOLoader(dracoLoader)
           }
 
-          const loader = new GLTFLoader()
           loader.parse(contents, '', function (result) {
-            main.model = result.scene
-            main.model.name = filename
-            main.model.animations.push(...result.animations)
-            main.scene.add(main.model)
+            const scene = result.scene
+            scene.name = filename
+
+            scene.animations.push(...result.animations)
+            editor.execute(new AddObjectCommand(editor, scene))
           })
         },
         false

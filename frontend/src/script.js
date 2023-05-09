@@ -87,7 +87,6 @@ export * as THREE from 'three'
 
 export { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 export { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
-export { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js'
 export { RGBELoader } from 'three/addons/loaders/RGBELoader.js'
 
 export * as dat from 'dat.gui'
@@ -100,20 +99,4 @@ export * from './gui.js'
 
 import { init } from './render.js'
 
-setupDropArea()
 init()
-
-const setupDropArea = () => {
-  document.addEventListener('drop', function (event) {
-    event.preventDefault()
-
-    if (event.dataTransfer.types[0] === 'text/plain') return // Outliner drop
-
-    if (event.dataTransfer.items) {
-      // DataTransferItemList supports folders
-      editor.loader.loadItemList(event.dataTransfer.items)
-    } else {
-      editor.loader.loadFiles(event.dataTransfer.files)
-    }
-  })
-}

@@ -5,6 +5,7 @@ export const setupGUI = () => {
   if (dat && main.model && main.scene) {
     const gui = new dat.GUI()
 
+    addScreenshotsFolder(gui)
     addCanvasFolder(gui)
     addModelsFolder(gui)
     addCameraFolder(gui)
@@ -12,6 +13,26 @@ export const setupGUI = () => {
   } else {
     console.error('dat.GUI library not loaded')
   }
+}
+
+const addScreenshotsFolder = gui => {
+  const screensParams = {
+    takeScreens: PARAMS.takeScreens,
+    nScreens: PARAMS.nScreens
+  }
+
+  const screensFolder = gui.addFolder('Screenshot')
+  const takeScreens = screensFolder.add(screensParams, 'takeScreens').name('Take screens?').listen()
+  const nScreens = screensFolder.add(screensParams, 'nScreens').name('Amount').min(1).max(10000).listen()
+  screensFolder.open()
+
+  // listeners
+  takeScreens.onChange(function (value) {
+    if (PARAMS.takeScreens !== value) PARAMS.takeScreens = value
+  })
+  nScreens.onChange(function (value) {
+    if (PARAMS.nScreens !== value) PARAMS.nScreens = value
+  })
 }
 
 const addCanvasFolder = gui => {
@@ -164,7 +185,7 @@ const addDebugFolder = gui => {
 
   const debugFolder = gui.addFolder('Debug')
   const debugNormals = debugFolder.add(debugParams, 'displayNormals').name('Apply normals?').listen()
-  
+
   // listeners
   debugNormals.onChange(function (value) {
     if (PARAMS.displayNormals !== value) PARAMS.displayNormals = value // TODO

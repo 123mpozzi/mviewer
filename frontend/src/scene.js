@@ -11,11 +11,11 @@ export const setupScene = () => {
   //camera.position.z = 100;
 
   main.scene = new THREE.Scene()
-  setupEnvironment('royal_esplanade_1k.hdr', PARAMS.useHDRLighting)
+  setupEnvironment(PARAMS.defaultBackground, PARAMS.useHDRLighting)
   setupModel()
 }
 
-const setupEnvironment = (defaultEnv = 'royal_esplanade_1k.hdr', applyEnvLighting = true) => {
+const setupEnvironment = (defaultEnv = PARAMS.defaultBackground, applyEnvLighting = true) => {
   if (!applyEnvLighting) {
     // setup decent light if not getting it from environment
     const ambientLight = new THREE.AmbientLight(0xededed, 0.8)

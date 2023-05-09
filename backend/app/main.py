@@ -1,12 +1,10 @@
-from fastapi import FastAPI, File, UploadFile, Request, Body
+from fastapi import FastAPI, File, UploadFile, Body
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-#from routers import upload, twoforms, unsplash, accordion
 
-from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi.templating import Jinja2Templates
+from fastapi.responses import RedirectResponse
 
-from typing import Dict
+from pathlib import Path
 import shutil, time, base64, json
 
 
@@ -24,20 +22,17 @@ app.add_middleware(
 )
 
 # Mount the dir "app/static" and assign it the name "static" to use internally
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
-
-templates = Jinja2Templates(directory="templates")
-@app.get("/upload/", response_class=HTMLResponse)
-async def upload(request: Request):
-   return templates.TemplateResponse("uploadfile.html", {"request": request})
+#app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 @app.post("/uploader/")
 async def create_upload_file(file: UploadFile = File(...)):
-    with open(f"static/models/{file.filename}", "wb") as buffer:
+    DIR_UPLOAD = 'uploads'
+    Path(f"/{DIR_UPLOAD}").mkdir(parents=True, exist_ok=True)
+    with open(f"{DIR_UPLOAD}/{file.filename}", "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
     #return {"filename": file.filename}
     # redirect to index
-    return RedirectResponse("/static/index.html", status_code=303)
+    return RedirectResponse("/index.html", status_code=303)
 
 @app.post("/screen/")
 async def save_screenshot(input_data: str = Body(...)):
@@ -49,15 +44,11 @@ async def save_screenshot(input_data: str = Body(...)):
         base64_image_str = base64_image_str[base64_image_str.find(",")+1:]
 
         filename = str(time.time()) + '.png'
-        with open(f"out/{filename}", "wb") as f:
+
+        DIR_SCREENS = 'out'
+        Path(f"/{DIR_SCREENS}").mkdir(parents=True, exist_ok=True)
+        with open(f"{DIR_SCREENS}/{filename}", "wb") as f:
             f.write(base64.decodebytes(base64_image_str.encode()))
     except Exception:
         return {"message": "There was an error uploading the file"}
     return {"filename": filename }
-
-#app.include_router(upload.router)
-
-# to get https://example.com/items/foo would be app.get(/items/foo)
-#@app.get("/") # GET operation
-#async def root():
-#    return {"message": "Hello World"}
