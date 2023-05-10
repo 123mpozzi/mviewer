@@ -4,7 +4,9 @@ services:
 
   backend:
     build: ./backend
-    command: uvicorn app.main:app --root-path /api --proxy-headers --host 127.0.0.1 --port 8000
+    command: uvicorn app.main:app --root-path /api --proxy-headers --host 0.0.0.0 --port 8000
+    volumes:
+      - backend-data:/data
 
   frontend:
     build: ./frontend
@@ -18,5 +20,6 @@ services:
       - backend
 
 volumes:
+  backend-data:
   caddy-data:
   caddy-config:

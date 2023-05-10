@@ -56,9 +56,8 @@ const genRanHex = size => [...Array(size)].map(() => Math.floor(Math.random() * 
 
 // Take and send a screenshot to the server
 // TODO: pack N screens and zip/pack them?
-const takeScreenshot = () => {
+const takeScreenshot = (debug = false) => {
   try {
-    const debug = false
     const strMime = 'image/jpeg'
 
     // canvas to base64 img data string
@@ -71,7 +70,9 @@ const takeScreenshot = () => {
       )
     }
 
-    fetch('http://localhost:8000/screen/', {
+    // contentType is not a typo: leave it like this or 422 Unprocessable Entity
+    // (eg with 'Content-Type')
+    fetch('http://localhost:8000/api/screen/', {
       method: 'POST',
       body: JSON.stringify({
         input_data: imgData

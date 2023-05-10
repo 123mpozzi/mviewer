@@ -19,6 +19,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"]
 )
 
 # Mount the dir "app/static" and assign it the name "static" to use internally
@@ -26,8 +27,8 @@ app.add_middleware(
 
 @app.post("/uploader/")
 async def create_upload_file(file: UploadFile = File(...)):
-    DIR_UPLOAD = 'uploads'
-    Path(f"/{DIR_UPLOAD}").mkdir(parents=True, exist_ok=True)
+    DIR_UPLOAD = '/data/uploads'
+    Path(f"{DIR_UPLOAD}").mkdir(parents=True, exist_ok=True)
     with open(f"{DIR_UPLOAD}/{file.filename}", "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
     #return {"filename": file.filename}
@@ -45,8 +46,8 @@ async def save_screenshot(input_data: str = Body(...)):
 
         filename = str(time.time()) + '.png'
 
-        DIR_SCREENS = 'out'
-        Path(f"/{DIR_SCREENS}").mkdir(parents=True, exist_ok=True)
+        DIR_SCREENS = '/data/out'
+        Path(f"{DIR_SCREENS}").mkdir(parents=True, exist_ok=True)
         with open(f"{DIR_SCREENS}/{filename}", "wb") as f:
             f.write(base64.decodebytes(base64_image_str.encode()))
     except Exception:
