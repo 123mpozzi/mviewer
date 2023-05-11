@@ -2,7 +2,7 @@ from fastapi import FastAPI, File, UploadFile, Body
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, FileResponse
 
 from traceback import print_exception
 from pathlib import Path
@@ -13,6 +13,7 @@ app = FastAPI()
 
 DIR_SCREENS = '/data/out'
 DIR_UPLOAD = '/data/uploads'
+INDEX = "/index.html"
 
 # Setup CORS
 origins = ["*"]
@@ -25,12 +26,16 @@ app.add_middleware(
     expose_headers=["*"]
 )
 
+def debug(msg: str):
+    print(msg, flush=True)
+
 def createIfNotExist(path: str):
     Path(path).mkdir(parents=True, exist_ok=True)
 
 # Mount the dir "app/static" and assign it the name "static" to use internally
 #app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
+# POST request to upload a file (either a model or a background)
 @app.post("/uploader/")
 async def create_upload_file(file: UploadFile = File(...)):
     createIfNotExist(DIR_UPLOAD)
@@ -38,8 +43,9 @@ async def create_upload_file(file: UploadFile = File(...)):
         shutil.copyfileobj(file.file, buffer)
     #return {"filename": file.filename}
     # redirect to index
-    return RedirectResponse("/index.html", status_code=303)
+    return RedirectResponse(INDEX, status_code=303)
 
+# POST request to upload a screenshot
 @app.post("/screen/")
 async def save_screenshot(post_data: str = Body(...)):
     try:
@@ -47,8 +53,7 @@ async def save_screenshot(post_data: str = Body(...)):
         dictData = json.loads(post_data)
         # get data from JSON
         base64_image_str = dictData['input_data']
-        download_request = dictData['download_request']
-        folder_name = str(dictData['folder_name'])
+        folder_name = str(dictData['folder_name'])  # client identificator
 
         # remove POST data added to base64 (remove till comma included)
         base64_image_str = base64_image_str[base64_image_str.find(",")+1:]
@@ -58,13 +63,6 @@ async def save_screenshot(post_data: str = Body(...)):
         out_path = os.path.join(out_dir, filename)
         
         createIfNotExist(out_dir)
-
-        # if the client request a download: archive the folder and POST it
-        if download_request:
-            # root and base dir declared like this to leave a dir inside the zip
-            zip_name = shutil.make_archive(f'archive_{out_dir}', format='zip', root_dir=out_dir)
-            # zip_name = shutil.make_archive(f'archive_{out_dir}', format='zip', root_dir='.', base_dir=out_dir)
-            return { "archive": zip_name }
         
         # Write the screenshot to disk
         with open(out_path, "wb") as f:
@@ -73,3 +71,22 @@ async def save_screenshot(post_data: str = Body(...)):
         print_exception(e)
         return {"message": "There was an error uploading the file"}
     return {"filename": filename }
+
+# GET request to zip and download a screenshots folder
+@app.get("/zip/{folder_name}")
+async def zip_folder(folder_name: str):
+    try:
+        out_dir = os.path.join(DIR_SCREENS, folder_name)
+        if not os.path.isdir(out_dir):
+            return { "message" : "Folder not found"}
+
+        out_zip = out_dir + '_archive'
+
+        zip_name = shutil.make_archive(out_zip, format='zip', root_dir=out_dir)
+        zip_name = os.path.join(out_dir, zip_name)
+        
+        response = FileResponse(path=zip_name, filename=zip_name)
+        return response
+    except Exception as e:
+        print_exception(e)
+        return {"message": "There was an error archiving the files"}

@@ -1,6 +1,7 @@
 import { THREE, OrbitControls, PARAMS, main, setBackground, setupScene, applyNormals } from './script.js'
 
 const clientId = Date.now()
+let counter = 0
 
 export const resizeWindow = (width, height) => {
   //const RAD2DEG = 114.59155902616465;
@@ -57,8 +58,36 @@ const setupRenderer = () => {
 const genRanHex = size => [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('')
 
 // Take and send a screenshot to the server
-// TODO: pack N screens and zip/pack them?
 const takeScreenshot = (debug = false) => {
+  // nScreens already taken: download
+  if(counter >= PARAMS.nScreens) {
+    let filename;
+    fetch('http://localhost:8000/api/zip/' + clientId, {
+      method: 'GET',
+    })
+    .then(res => {
+      const disposition = res.headers.get('Content-Disposition');
+      filename = disposition.split(/;(.+)/)[1].split(/=(.+)/)[1];
+      if (filename.toLowerCase().startsWith("utf-8''"))
+          filename = decodeURIComponent(filename.replace("utf-8''", ''));
+      else
+          filename = filename.replace(/['"]/g, '');
+      return res.blob();
+    })
+    .then(blob => {
+        var url = window.URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a); // append the element to the dom
+        a.click();
+        a.remove(); // afterwards, remove the element  
+    });
+
+    PARAMS.takeScreens = false  // TODO: Reset button (previously unclickable during POSTs)
+    return
+  }
+
   try {
     const strMime = 'image/jpeg'
 
@@ -73,10 +102,6 @@ const takeScreenshot = (debug = false) => {
     }
 
     // TODO: params.nscreens and count syncronization!!
-    let downloadFlag = false
-    if(PARAMS.nScreens >= PARAMS.count) {
-      downloadFlag = true
-    }
 
     //let folderName = ''
     //if(PARAMS.count === 0)
@@ -98,20 +123,20 @@ const takeScreenshot = (debug = false) => {
       method: 'POST',
       body: JSON.stringify({
         input_data: imgData,
-        folder_name: clientId,
-        download_request: downloadFlag
+        folder_name: clientId
       }),
       headers: {
         contentType: 'application/json; charset=utf-8'
       }
     })
     .then(res => res.json())
-    .then(data => {console.log(data)})
+    .then(data => { 
+      console.log(data)
+      console.log(counter)
+      counter++ })
 
     //if(response.text())
     //console.log(response)
-
-    downloadFlag = false
   } catch (e) {
     console.log(e)
     return
@@ -160,8 +185,10 @@ export const animate = () => {
 
   requestAnimationFrame(animate)
 
-  if (PARAMS.takeScreens && PARAMS.count < PARAMS.nScreens) takeScreenshot() // TODO: very fast, is right?
+  //if (PARAMS.takeScreens && counter < PARAMS.nScreens)
+  if (PARAMS.takeScreens)
+    takeScreenshot() // TODO: very fast, is right?
 
-  PARAMS.count++
+  //PARAMS.count++
   render()
 }

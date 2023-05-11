@@ -7,15 +7,11 @@ header / {
 }
 
 # handle all requests to paths that start with /api/ and proxying them to the backend server
-@post method POST
 handle_path /api/* {
     header Access-Control-Allow-Origin *
     header Access-Control-Allow-Methods "GET, POST, OPTIONS"
     header Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-    reverse_proxy @post backend:8000 {
-        #header_up Host {upstream_hostport}
-        #header_up X-Real-IP {remote_addr}
-        #header_up X-Forwarded-Host {host}
+    reverse_proxy backend:8000 {
     }
 }
 
