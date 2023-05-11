@@ -1,5 +1,7 @@
 import { THREE, OrbitControls, PARAMS, main, setBackground, setupScene, applyNormals } from './script.js'
 
+const clientId = Date.now()
+
 export const resizeWindow = (width, height) => {
   //const RAD2DEG = 114.59155902616465;
   //camera.fov = Math.atan(window.innerHeight / 2 / camera.position.z) * 2 * RAD2DEG;
@@ -70,17 +72,46 @@ const takeScreenshot = (debug = false) => {
       )
     }
 
+    // TODO: params.nscreens and count syncronization!!
+    let downloadFlag = false
+    if(PARAMS.nScreens >= PARAMS.count) {
+      downloadFlag = true
+    }
+
+    //let folderName = ''
+    //if(PARAMS.count === 0)
+    //  folderName = Date.now()
+
+    // TODO: I think this is better practice:
+    // downloadFlag requests download, then sets itself to false
+    // Client goes on. Once the server has the archive, it responds in some way its URI?
+    // and Client GET it
+
+    // TODO: make nScreens and count not changeable while not finished sending all!
+    // in script.js setup a set method that checks if sending === true.
+    // Sending will be false when the server responds with the ZIp or OK
+
     // contentType is not a typo: leave it like this or 422 Unprocessable Entity
     // (eg with 'Content-Type')
+    //const response = await fetch('http://localhost:8000/api/screen/', {
     fetch('http://localhost:8000/api/screen/', {
       method: 'POST',
       body: JSON.stringify({
-        input_data: imgData
+        input_data: imgData,
+        folder_name: clientId,
+        download_request: downloadFlag
       }),
       headers: {
         contentType: 'application/json; charset=utf-8'
       }
     })
+    .then(res => res.json())
+    .then(data => {console.log(data)})
+
+    //if(response.text())
+    //console.log(response)
+
+    downloadFlag = false
   } catch (e) {
     console.log(e)
     return
