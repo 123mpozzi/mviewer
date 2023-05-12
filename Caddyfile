@@ -1,5 +1,9 @@
 :80
 
+#log {
+#    level INFO
+#}
+
 header / {
   Access-Control-Allow-Origin *
   Access-Control-Allow-Methods "GET, POST, OPTIONS"

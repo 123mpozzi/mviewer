@@ -7,13 +7,21 @@ from fastapi.responses import RedirectResponse, FileResponse
 from traceback import print_exception
 from pathlib import Path
 import shutil, time, base64, json, os
+import aiofiles
 
 
 app = FastAPI()
 
 DIR_SCREENS = '/data/out'
 DIR_UPLOAD = '/data/uploads'
+DIR_UPLOAD_MODELS =  os.path.join(DIR_UPLOAD, 'models')
+DIR_UPLOAD_BACKGROUNDS = os.path.join(DIR_UPLOAD, 'backgrounds')
+DIR_UPLOAD_BACKGROUNDS_ZIP = os.path.join(DIR_UPLOAD, 'backgrounds_zip')
 INDEX = "/index.html"
+
+allowed_extensions = ('.zip', '.glb', '.hdr', '.hdri', '.png', '.jpg', '.jpeg', '.gif', '.bmp')
+
+CHUNK_SIZE = 1024 * 1024  # adjust the chunk size as desired
 
 # Setup CORS
 origins = ["*"]
@@ -36,13 +44,39 @@ def createIfNotExist(path: str):
 #app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 # POST request to upload a file (either a model or a background)
+# for info on UploadFile, see here: https://stackoverflow.com/a/70657621
 @app.post("/uploader/")
 async def create_upload_file(file: UploadFile = File(...)):
-    createIfNotExist(DIR_UPLOAD)
-    with open(os.path.join(DIR_UPLOAD, file.filename), "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-    #return {"filename": file.filename}
-    # redirect to index
+    try:
+        _, extension = os.path.splitext(file.filename.lower())
+        if extension not in allowed_extensions:
+            return {"message": "File extension not supported"}
+        
+        unzip = False
+        if extension == '.zip':  # zip of backgrounds
+            out_dir = DIR_UPLOAD_BACKGROUNDS_ZIP
+            unzip = True
+        elif extension == '.glb':  # model file
+            out_dir = DIR_UPLOAD_MODELS
+        else:  # background image
+            out_dir = DIR_UPLOAD_BACKGROUNDS
+
+        createIfNotExist(out_dir)
+        out_file = os.path.join(out_dir, file.filename)
+        async with aiofiles.open(out_file, 'wb') as f:
+            while contents := await file.read(CHUNK_SIZE):
+                await f.write(contents)
+        
+        if unzip:
+            if os.path.exists(out_file):
+                shutil.unpack_archive(out_file, DIR_UPLOAD_BACKGROUNDS, 'zip')
+            else:
+                return {"message": "There was an error finding the zip file"}
+    except Exception as e:
+        print_exception(e)
+        return {"message": "There was an error uploading the file"}
+    finally:
+        await file.close()
     return RedirectResponse(INDEX, status_code=303)
 
 # POST request to upload a screenshot
@@ -65,8 +99,8 @@ async def save_screenshot(post_data: str = Body(...)):
         createIfNotExist(out_dir)
         
         # Write the screenshot to disk
-        with open(out_path, "wb") as f:
-            f.write(base64.decodebytes(base64_image_str.encode()))
+        async with aiofiles.open(out_path, "wb") as f:
+            await f.write(base64.decodebytes(base64_image_str.encode()))
     except Exception as e:
         print_exception(e)
         return {"message": "There was an error uploading the file"}
