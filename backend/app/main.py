@@ -73,7 +73,7 @@ async def save_screenshot(post_data: str = Body(...)):
     return {"filename": filename }
 
 # GET request to zip and download a screenshots folder
-@app.get("/zip/{folder_name}")
+@app.get("/zip/{folder_name}", response_class=FileResponse)
 async def zip_folder(folder_name: str):
     try:
         out_dir = os.path.join(DIR_SCREENS, folder_name)

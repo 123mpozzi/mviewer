@@ -15,23 +15,45 @@ export const setupGUI = () => {
   }
 }
 
+let nScreensElem, takeScreensElem
+
+export function enableScreensGUIs () {
+  if (nScreensElem) enable(nScreensElem)
+  if (takeScreensElem) enable(takeScreensElem)
+}
+
+const disable = elem => {
+  elem.__li.style = 'opacity: 0.5; filter: grayscale(100%) blur(1px); pointer-events: none;'
+}
+
+const enable = elem => {
+  elem.__li.style = ';'
+}
+
 const addScreenshotsFolder = gui => {
   const screensParams = {
-    takeScreens: PARAMS.takeScreens,
+    takeScreens: () => {
+      if (PARAMS.takeScreens !== true) {
+        PARAMS.takeScreens = true
+        disable(takeScreensElem)
+        disable(nScreensElem)
+      }
+    },
     nScreens: PARAMS.nScreens
   }
 
   const screensFolder = gui.addFolder('Screenshot')
-  const takeScreens = screensFolder.add(screensParams, 'takeScreens').name('Take screens?').listen()
-  const nScreens = screensFolder.add(screensParams, 'nScreens').name('Amount').min(1).max(10000).listen()
+  takeScreensElem = screensFolder.add(screensParams, 'takeScreens').name('Take screens?').listen()
+  nScreensElem = screensFolder.add(screensParams, 'nScreens').name('Amount').min(50).max(1000).listen()
   screensFolder.open()
 
   // listeners
-  takeScreens.onChange(function (value) {
-    if (PARAMS.takeScreens !== value) PARAMS.takeScreens = value
-  })
-  nScreens.onChange(function (value) {
-    if (PARAMS.nScreens !== value) PARAMS.nScreens = value
+  nScreensElem.onChange(function (value) {
+    if (PARAMS.takeScreens === false) {
+      PARAMS.nScreens = value
+    } else {
+      disable(nScreensElem)
+    }
   })
 }
 

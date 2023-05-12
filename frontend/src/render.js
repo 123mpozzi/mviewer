@@ -1,6 +1,6 @@
-import { THREE, OrbitControls, PARAMS, main, setBackground, setupScene, applyNormals } from './script.js'
+import { THREE, OrbitControls, PARAMS, main, setBackground, setupScene, applyNormals, enableScreensGUIs } from './script.js'
 
-const clientId = Date.now()
+let clientId = Date.now()
 let counter = 0
 
 export const resizeWindow = (width, height) => {
@@ -60,35 +60,39 @@ const genRanHex = size => [...Array(size)].map(() => Math.floor(Math.random() * 
 // Take and send a screenshot to the server
 const takeScreenshot = (debug = false) => {
   // nScreens already taken: download
-  if(counter >= PARAMS.nScreens) {
-    let filename;
+  if (counter >= PARAMS.nScreens) {
+    let filename
     fetch('http://localhost:8000/api/zip/' + clientId, {
-      method: 'GET',
-    })
-    .then(res => {
-      const disposition = res.headers.get('Content-Disposition');
-      filename = disposition.split(/;(.+)/)[1].split(/=(.+)/)[1];
-      if (filename.toLowerCase().startsWith("utf-8''"))
-          filename = decodeURIComponent(filename.replace("utf-8''", ''));
-      else
-          filename = filename.replace(/['"]/g, '');
-      return res.blob();
-    })
-    .then(blob => {
-        var url = window.URL.createObjectURL(blob);
-        var a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a); // append the element to the dom
-        a.click();
-        a.remove(); // afterwards, remove the element  
-    });
+      method: 'GET'
+    })  // Handle the FileResponse
+      .then(res => {
+        const disposition = res.headers.get('Content-Disposition')
+        filename = disposition.split(/;(.+)/)[1].split(/=(.+)/)[1]
+        if (filename.toLowerCase().startsWith("utf-8''"))
+          filename = decodeURIComponent(filename.replace("utf-8''", ''))
+        else filename = filename.replace(/['"]/g, '')
+        return res.blob()
+      })
+      .then(blob => {
+        var url = window.URL.createObjectURL(blob)
+        var a = document.createElement('a')
+        a.href = url
+        a.download = filename
+        document.body.appendChild(a) // append the element to the dom
+        a.click()
+        a.remove() // afterwards, remove the element
+      })
+      .catch(error => {
+        console.log(error)
+      })
 
-    PARAMS.takeScreens = false  // TODO: Reset button (previously unclickable during POSTs)
+    // Reset screenshots button (previously unclickable during POST requests)
+    PARAMS.takeScreens = false
+    enableScreensGUIs()  // Re-enable the screenshot controller elements in the GUI
+    counter = 0
+    clientId = Date.now()  // reset id
     return
-  }
-
-  try {
+  } else {
     const strMime = 'image/jpeg'
 
     // canvas to base64 img data string
@@ -101,24 +105,6 @@ const takeScreenshot = (debug = false) => {
       )
     }
 
-    // TODO: params.nscreens and count syncronization!!
-
-    //let folderName = ''
-    //if(PARAMS.count === 0)
-    //  folderName = Date.now()
-
-    // TODO: I think this is better practice:
-    // downloadFlag requests download, then sets itself to false
-    // Client goes on. Once the server has the archive, it responds in some way its URI?
-    // and Client GET it
-
-    // TODO: make nScreens and count not changeable while not finished sending all!
-    // in script.js setup a set method that checks if sending === true.
-    // Sending will be false when the server responds with the ZIp or OK
-
-    // contentType is not a typo: leave it like this or 422 Unprocessable Entity
-    // (eg with 'Content-Type')
-    //const response = await fetch('http://localhost:8000/api/screen/', {
     fetch('http://localhost:8000/api/screen/', {
       method: 'POST',
       body: JSON.stringify({
@@ -129,17 +115,17 @@ const takeScreenshot = (debug = false) => {
         contentType: 'application/json; charset=utf-8'
       }
     })
-    .then(res => res.json())
-    .then(data => { 
-      console.log(data)
-      console.log(counter)
-      counter++ })
-
-    //if(response.text())
-    //console.log(response)
-  } catch (e) {
-    console.log(e)
-    return
+      .then(res => res.json())
+      .then(data => {
+        if (debug) {
+          console.log(data)
+          console.log(counter)
+        }
+        counter++
+      })
+      .catch(error => {
+        console.log(error)
+      })
   }
 }
 
@@ -185,10 +171,7 @@ export const animate = () => {
 
   requestAnimationFrame(animate)
 
-  //if (PARAMS.takeScreens && counter < PARAMS.nScreens)
-  if (PARAMS.takeScreens)
-    takeScreenshot() // TODO: very fast, is right?
+  if (PARAMS.takeScreens) takeScreenshot()
 
-  //PARAMS.count++
   render()
 }
