@@ -65,12 +65,23 @@ export const applyNormals = model => {
   }
 }
 
-const setupModel = () => {
+/*
+const clearScene = () => {
+  while(main.scene.children.length > 0) { 
+    main.scene.remove(main.scene.children[0]); 
+  }
+};*/
+
+export const setupModel = (modelName = 'ring_gold_with_diamond.glb') => {
   // set path to models folder
-  const loader = new GLTFLoader().setPath(DEFAULT_MODELS_DIR)
+  if (!main.loader) main.loader = new GLTFLoader().setPath(DEFAULT_MODELS_DIR)
+
+  //clearScene()
+  // remove old model from the scene, if present
+  if(main.model) main.scene.remove(main.model);
 
   // Add GLTF model
-  loader.load('ring_gold_with_diamond.glb', function (gltf) {
+  main.loader.load(modelName, function (gltf) {
     main.model = gltf.scene
     main.scene.add(main.model)
 

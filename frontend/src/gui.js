@@ -1,9 +1,14 @@
 import { main, resizeWindow, setBackground, PARAMS, dat } from './script.js'
 
+let gui
+
 export const setupGUI = () => {
   // Once the dat.GUI library is loaded, you can access it via window.dat or simply dat
   if (dat && main.model && main.scene) {
-    const gui = new dat.GUI()
+    // destroy old GUI, if present
+    if(gui) gui.destroy()
+
+    gui = new dat.GUI()
 
     addScreenshotsFolder(gui)
     addCanvasFolder(gui)

@@ -1,4 +1,4 @@
-import { THREE, OrbitControls, PARAMS, main, setBackground, setupScene, applyNormals, enableScreensGUIs } from './script.js'
+import { THREE, OrbitControls, PARAMS, main, setBackground, setupScene, applyNormals, enableScreensGUIs, setupModel } from './script.js'
 
 let clientId = Date.now()
 let counter = 0
@@ -55,6 +55,10 @@ const setupRenderer = () => {
   main.renderer.outputColorSpace = THREE.SRGBColorSpace
 }
 
+export const pickRandom = arr => {
+  return arr[Math.floor(Math.random() * arr.length)]
+};
+
 const genRanHex = size => [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('')
 
 // Take and send a screenshot to the server
@@ -91,6 +95,7 @@ const takeScreenshot = (debug = false) => {
     enableScreensGUIs()  // Re-enable the screenshot controller elements in the GUI
     counter = 0
     clientId = Date.now()  // reset id
+    setupModel('shattered_glass.glb')
     return
   } else {
     const strMime = 'image/jpeg'
@@ -141,9 +146,10 @@ export const animate = () => {
     main.model.rotation.y += PARAMS.angleY
     main.model.rotation.z += PARAMS.angleZ
 
-    // Modify scale only every n screenshots
+    // Modify scale only every n screenshots  // TODO
     if (PARAMS.count > PARAMS.nScreens) {
-      const newScale = PARAMS.scales[Math.floor(Math.random() * PARAMS.scales.length)]
+      //const newScale = PARAMS.scales[Math.floor(Math.random() * PARAMS.scales.length)]
+      const newScale = pickRandom(PARAMS.scales)
       main.model.scale.set(newScale, newScale, newScale)
       PARAMS.count = 0
     }
@@ -160,12 +166,14 @@ export const animate = () => {
     // Use a texture
     // TODO: GET backgrounds from fastAPI and randomize
     const arr = ['sky.jpg', 'royal_esplanade_1k.hdr', 'abandoned_tiled_room_1k.hdr']
-    PARAMS.bg = arr[Math.floor(Math.random() * arr.length)]
+    //PARAMS.bg = arr[Math.floor(Math.random() * arr.length)]
+    PARAMS.bg = pickRandom(arr)
   }
   if (PARAMS.randomBackground) setBackground(PARAMS.bg)
 
   const arrZoom = [0.5, 1.0, 1.5]
-  const zoom = arrZoom[Math.floor(Math.random() * arrZoom.length)]
+  //const zoom = arrZoom[Math.floor(Math.random() * arrZoom.length)]
+  const zoom = pickRandom(arrZoom)
   //camera.zoom = zoom;
   //camera.updateProjectionMatrix();
 

@@ -41,7 +41,7 @@ export const PARAMS = {
   resizeToWindowSize: false
 }
 
-var camera, scene, renderer, model, textureLoader, hdrLoader
+var camera, scene, renderer, model, textureLoader, hdrLoader, loader
 export const main = {
   get camera () {
     return camera
@@ -78,6 +78,12 @@ export const main = {
   },
   set hdrLoader (value) {
     hdrLoader = value
+  },
+  get loader () {
+    return loader
+  },
+  set loader (value) {
+    loader = value
   }
 }
 

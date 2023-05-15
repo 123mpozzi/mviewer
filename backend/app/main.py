@@ -124,3 +124,17 @@ async def zip_folder(folder_name: str):
     except Exception as e:
         print_exception(e)
         return {"message": "There was an error archiving the files"}
+
+# GET request to retrieve a model
+@app.get("/models/{model_name}", response_class=FileResponse)
+async def fetch_model(model_name: str):
+    try:
+        model_path = os.path.join(DIR_UPLOAD_MODELS, model_name)
+        if not os.path.isfile(model_path):
+            return { "message" : "Model not found"}
+        
+        response = FileResponse(path=model_path, filename=model_name)
+        return response
+    except Exception as e:
+        print_exception(e)
+        return {"message": "There was an error fetching the model"}
