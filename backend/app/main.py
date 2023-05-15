@@ -19,7 +19,11 @@ DIR_UPLOAD_BACKGROUNDS = os.path.join(DIR_UPLOAD, 'backgrounds')
 DIR_UPLOAD_BACKGROUNDS_ZIP = os.path.join(DIR_UPLOAD, 'backgrounds_zip')
 INDEX = "/index.html"
 
-allowed_extensions = ('.zip', '.glb', '.hdr', '.hdri', '.png', '.jpg', '.jpeg', '.gif', '.bmp')
+allowed_ext_archives = ('.zip',)  # leave the comma to indicate Python that this is a tuple, not a str
+allowed_ext_models = ('.glb',)
+allowed_ext_environments = ('.hdr', '.hdri')
+allowed_ext_images = ('.png', '.jpg', '.jpeg', '.gif', '.bmp')
+allowed_extensions =  allowed_ext_archives + allowed_ext_models + allowed_ext_environments + allowed_ext_images
 
 CHUNK_SIZE = 1024 * 1024  # adjust the chunk size as desired
 
@@ -40,6 +44,10 @@ def debug(msg: str):
 def createIfNotExist(path: str):
     Path(path).mkdir(parents=True, exist_ok=True)
 
+def isModel(path: str):
+    _, ext = os.path.splitext(path.lower())
+    return os.path.isfile(path) and ext in allowed_ext_models
+
 # Mount the dir "app/static" and assign it the name "static" to use internally
 #app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
@@ -53,10 +61,10 @@ async def create_upload_file(file: UploadFile = File(...)):
             return {"message": "File extension not supported"}
         
         unzip = False
-        if extension == '.zip':  # zip of backgrounds
+        if extension in allowed_ext_archives:  # zip of backgrounds
             out_dir = DIR_UPLOAD_BACKGROUNDS_ZIP
             unzip = True
-        elif extension == '.glb':  # model file
+        elif extension in allowed_ext_models:  # model file
             out_dir = DIR_UPLOAD_MODELS
         else:  # background image
             out_dir = DIR_UPLOAD_BACKGROUNDS
@@ -112,7 +120,7 @@ async def zip_folder(folder_name: str):
     try:
         out_dir = os.path.join(DIR_SCREENS, folder_name)
         if not os.path.isdir(out_dir):
-            return { "message" : "Folder not found"}
+            return { "message" : "Folder not found"}  # TODO: may cause problem with response_class as this is JSON object (dict)
 
         out_zip = out_dir + '_archive'
 
@@ -126,11 +134,11 @@ async def zip_folder(folder_name: str):
         return {"message": "There was an error archiving the files"}
 
 # GET request to retrieve a model
-@app.get("/models/{model_name}", response_class=FileResponse)
+@app.get("/models/{model_name}")
 async def fetch_model(model_name: str):
     try:
         model_path = os.path.join(DIR_UPLOAD_MODELS, model_name)
-        if not os.path.isfile(model_path):
+        if not isModel(model_path):
             return { "message" : "Model not found"}
         
         response = FileResponse(path=model_path, filename=model_name)

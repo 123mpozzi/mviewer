@@ -15,6 +15,7 @@ export const PARAMS = {
   angleY: 0.02,
   angleZ: 0,
   scales: [0.5, 1.0, 1.5],
+  defaultModel: 'http://localhost:8000/api/models/ring_gold_with_diamond.glb',
   defaultBackground: 'royal_esplanade_1k.hdr',
   /** Whether to change background at each frame */
   randomBackground: false,

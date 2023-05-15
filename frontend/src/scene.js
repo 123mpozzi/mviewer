@@ -2,7 +2,6 @@ import { THREE, GLTFLoader, RGBELoader, main, PARAMS, setupGUI, animate } from '
 
 // Vite copies 'public' directory to root dist directory by default
 const DEFAULT_BACKGROUNDS_DIR = 'backgrounds/'
-const DEFAULT_MODELS_DIR = 'models/'
 
 export const setupScene = () => {
   // Setup camera
@@ -78,14 +77,14 @@ export const applyNormals = (model, debug = false) => {
   }
 }
 
+
 /**
  * Load a model into the scene.  
  * If there is already a model in the scene, delete it first
- * @param {*} modelName path of the model to load
+ * @param {*} modelName URL path of the resource to load
  */
-export const setupModel = (modelName = 'ring_gold_with_diamond.glb') => {
-  // set path to models folder
-  if (!main.loader) main.loader = new GLTFLoader().setPath(DEFAULT_MODELS_DIR)
+export const setupModel = (modelName = PARAMS.defaultModel) => {
+  if(!main.loader) main.loader = new GLTFLoader()
 
   // remove old model from the scene, if present
   if(main.model) main.scene.remove(main.model);
@@ -100,6 +99,10 @@ export const setupModel = (modelName = 'ring_gold_with_diamond.glb') => {
     // GUI and Animation are dependent on the current model
     setupGUI()
     animate()
+  },
+  undefined,    // onProgress callback
+  (event) => {  // onError callback
+    console.error(event)
   })
 }
 
