@@ -22,15 +22,18 @@ export const setupGUI = () => {
 
 let nScreensElem, takeScreensElem
 
+/** Make the controls of the screenshot folder inside the GUI clickable again */
 export function enableScreensGUIs () {
   if (nScreensElem) enable(nScreensElem)
   if (takeScreensElem) enable(takeScreensElem)
 }
 
+/** Make a GUI element un-clickable */
 const disable = elem => {
   elem.__li.style = 'opacity: 0.5; filter: grayscale(100%) blur(1px); pointer-events: none;'
 }
 
+/** Make a GUI element clickable again */
 const enable = elem => {
   elem.__li.style = ';'
 }

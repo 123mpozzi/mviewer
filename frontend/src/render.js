@@ -1,6 +1,8 @@
 import { THREE, OrbitControls, PARAMS, main, setBackground, setupScene, applyNormals, enableScreensGUIs, setupModel } from './script.js'
 
+/** Identifier of the current screenshot session */
 let clientId = Date.now()
+/** Counter of the screenshots in the current session */
 let counter = 0
 
 export const resizeWindow = (width, height) => {
@@ -37,6 +39,7 @@ export const init = () => {
     })
 }
 
+/** Initialize the renderer and its drawing canvas */
 const setupRenderer = () => {
   // Init renderer
   main.renderer = new THREE.WebGLRenderer({
@@ -55,111 +58,140 @@ const setupRenderer = () => {
   main.renderer.outputColorSpace = THREE.SRGBColorSpace
 }
 
+/** Return a random element from the given array */
 export const pickRandom = arr => {
   return arr[Math.floor(Math.random() * arr.length)]
 };
 
+/** Generate random hex color */
 const genRanHex = size => [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('')
 
-// Take and send a screenshot to the server
+/**
+ * Reset the screenshots counter and other parameters to prepare for a new screenshot session
+ */
+const resetScreenshotSession = () => {
+  // Reset screenshots button (previously unclickable during POST requests)
+  PARAMS.takeScreens = false
+  enableScreensGUIs()  // Re-enable the screenshot controller elements in the GUI
+  counter = 0
+  clientId = Date.now()  // reset id
+  setupModel('shattered_glass.glb') // TODO: remove, it is just for testing
+};
+
+/**
+ * Request and download the screenshots folder from the server
+ */
+const downloadScreenshotFolder = () => {
+  let filename
+  fetch('http://localhost:8000/api/zip/' + clientId, {
+    method: 'GET'
+  })  // Handle the FileResponse
+    .then(res => {
+      const disposition = res.headers.get('Content-Disposition')
+      filename = disposition.split(/;(.+)/)[1].split(/=(.+)/)[1]
+      if (filename.toLowerCase().startsWith("utf-8''"))
+        filename = decodeURIComponent(filename.replace("utf-8''", ''))
+      else filename = filename.replace(/['"]/g, '')
+      return res.blob()
+    })
+    .then(blob => {
+      var url = window.URL.createObjectURL(blob)
+      var a = document.createElement('a')
+      a.href = url
+      a.download = filename
+      document.body.appendChild(a) // append the element to the dom
+      a.click()
+      a.remove() // afterwards, remove the element
+    })
+    .catch(error => {
+      console.log(error)
+    })
+};
+
+/**
+ * Shoot a screenshot of the current canvas, and upload it to the server
+ * @param {*} debug whether to print canvas data (base64 format)
+ */
+const uploadScreenshot = (debug = false) => {
+  const strMime = 'image/jpeg'
+
+  // canvas to base64 img data string
+  const imgData = main.renderer.domElement.toDataURL(strMime)
+  if (debug) {
+    console.log(
+      JSON.stringify({
+        input_data: imgData
+      })
+    )
+  }
+
+  // POST the base64 encoded canvas and the session identifier as JSON
+  fetch('http://localhost:8000/api/screen/', {
+    method: 'POST',
+    body: JSON.stringify({
+      input_data: imgData,
+      folder_name: clientId
+    }),
+    headers: {
+      contentType: 'application/json; charset=utf-8'
+    }
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (debug) {
+        console.log(data)
+        console.log(counter)
+      }
+      // increase screenshots counter
+      counter++
+    })
+    .catch(error => {
+      console.log(error)
+    })
+}
+
+/**
+ * Take a screenshot of the current canvas and send it to the server.  
+ * If the screenshot counter is reached, instead, download the screenshots folder
+ * @param {*} debug whether to debug the uploading data
+ */
 const takeScreenshot = (debug = false) => {
   // nScreens already taken: download
   if (counter >= PARAMS.nScreens) {
-    let filename
-    fetch('http://localhost:8000/api/zip/' + clientId, {
-      method: 'GET'
-    })  // Handle the FileResponse
-      .then(res => {
-        const disposition = res.headers.get('Content-Disposition')
-        filename = disposition.split(/;(.+)/)[1].split(/=(.+)/)[1]
-        if (filename.toLowerCase().startsWith("utf-8''"))
-          filename = decodeURIComponent(filename.replace("utf-8''", ''))
-        else filename = filename.replace(/['"]/g, '')
-        return res.blob()
-      })
-      .then(blob => {
-        var url = window.URL.createObjectURL(blob)
-        var a = document.createElement('a')
-        a.href = url
-        a.download = filename
-        document.body.appendChild(a) // append the element to the dom
-        a.click()
-        a.remove() // afterwards, remove the element
-      })
-      .catch(error => {
-        console.log(error)
-      })
-
-    // Reset screenshots button (previously unclickable during POST requests)
-    PARAMS.takeScreens = false
-    enableScreensGUIs()  // Re-enable the screenshot controller elements in the GUI
-    counter = 0
-    clientId = Date.now()  // reset id
-    setupModel('shattered_glass.glb')
-    return
+    downloadScreenshotFolder()
+    resetScreenshotSession()
   } else {
-    const strMime = 'image/jpeg'
-
-    // canvas to base64 img data string
-    const imgData = main.renderer.domElement.toDataURL(strMime)
-    if (debug) {
-      console.log(
-        JSON.stringify({
-          input_data: imgData
-        })
-      )
-    }
-
-    fetch('http://localhost:8000/api/screen/', {
-      method: 'POST',
-      body: JSON.stringify({
-        input_data: imgData,
-        folder_name: clientId
-      }),
-      headers: {
-        contentType: 'application/json; charset=utf-8'
-      }
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (debug) {
-          console.log(data)
-          console.log(counter)
-        }
-        counter++
-      })
-      .catch(error => {
-        console.log(error)
-      })
+    uploadScreenshot(debug)
   }
 }
 
-const render = () => {
-  main.renderer.render(main.scene, main.camera)
-}
+/**
+ * Do a frame animation for the model.  
+ * Assume the model exists
+ */
+const updateModel = () => {
+  // Modify angle
+  main.model.rotation.x += PARAMS.angleX
+  main.model.rotation.y += PARAMS.angleY
+  main.model.rotation.z += PARAMS.angleZ
 
-// Change Model angle, scale, and Scene background
-export const animate = () => {
-  if (main.model) {
-    // modify angle
-    main.model.rotation.x += PARAMS.angleX
-    main.model.rotation.y += PARAMS.angleY
-    main.model.rotation.z += PARAMS.angleZ
-
-    // Modify scale only every n screenshots  // TODO
-    if (PARAMS.count > PARAMS.nScreens) {
-      //const newScale = PARAMS.scales[Math.floor(Math.random() * PARAMS.scales.length)]
-      const newScale = pickRandom(PARAMS.scales)
-      main.model.scale.set(newScale, newScale, newScale)
-      PARAMS.count = 0
-    }
-
-    if (PARAMS.displayNormals) {
-      applyNormals(main.model) // TODO: works, but then cannot set it back!
-    }
+  // Modify scale only every n screenshots  // TODO
+  if (PARAMS.count > PARAMS.nScreens) {
+    //const newScale = PARAMS.scales[Math.floor(Math.random() * PARAMS.scales.length)]
+    const newScale = pickRandom(PARAMS.scales)
+    main.model.scale.set(newScale, newScale, newScale)
+    PARAMS.count = 0
   }
 
-  // Modify background
+  if (PARAMS.displayNormals) {
+    applyNormals(main.model) // TODO: works, but then cannot set it back!
+  }
+}
+
+/**
+ * Do a frame animation for the background: change it randomly
+ */
+const updateBackground = () => {
   if (Math.random() < 0.5) {
     PARAMS.bg = Number(genRanHex(6))
   } else {
@@ -169,7 +201,23 @@ export const animate = () => {
     //PARAMS.bg = arr[Math.floor(Math.random() * arr.length)]
     PARAMS.bg = pickRandom(arr)
   }
-  if (PARAMS.randomBackground) setBackground(PARAMS.bg)
+
+  setBackground(PARAMS.bg)
+}
+
+/**
+ * Render a static scene
+ */
+const render = () => {
+  main.renderer.render(main.scene, main.camera)
+}
+
+/**
+ * Render a dynamic scene
+ */
+export const animate = () => {
+  if (main.model) updateModel()
+  if (PARAMS.randomBackground) updateBackground()
 
   const arrZoom = [0.5, 1.0, 1.5]
   //const zoom = arrZoom[Math.floor(Math.random() * arrZoom.length)]

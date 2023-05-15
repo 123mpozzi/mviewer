@@ -29,11 +29,15 @@ const setupEnvironment = (defaultEnv = PARAMS.defaultBackground, applyEnvLightin
   //loadHdr('abandoned_tiled_room_1k.hdr', false);
 }
 
-const loadHdr = (file, applyLighting = false) => {
+/**
+ * Load a HDR environment as background
+ * @param {*} path path of the HDR environment
+ * @param {*} applyLighting whether to apply the environmental lighting (default is taken from `royal_esplanade_1k.hdr`)
+ */
+const loadHdr = (path, applyLighting = false) => {
   if (!main.hdrLoader) main.hdrLoader = new RGBELoader().setPath(DEFAULT_BACKGROUNDS_DIR)
 
-  main.hdrLoader.load(file, function (texture) {
-    // handle HDR environments
+  main.hdrLoader.load(path, function (texture) {
     texture.mapping = THREE.EquirectangularReflectionMapping // map spheric texture to scene
 
     // Apply good lighting (default is taken from royal_esplanade_1k.hdr)
@@ -44,39 +48,45 @@ const loadHdr = (file, applyLighting = false) => {
   })
 }
 
-const loadTexture = file => {
+/**
+ * Load an image as background
+ * @param {*} path path of the image
+ */
+const loadTexture = path => {
   if (!main.textureLoader) main.textureLoader = new THREE.TextureLoader().setPath(DEFAULT_BACKGROUNDS_DIR)
 
-  main.textureLoader.load(file, function (texture) {
-    // handle img backgrounds
+  main.textureLoader.load(path, function (texture) {
     main.scene.background = texture
     texture.dispose()
   })
 }
 
-// Apply to the model its normal map, to visualize it
-// Useful when model is not rendering correctly (eg. transparency)
-export const applyNormals = model => {
+/**
+ * Apply to the model its normals map, to visualize it.  
+ * Useful when model is not rendering correctly (eg. transparency)
+ * @param {*} model the model to update
+ * @param {*} debug whether to print data of the meshes
+ */
+export const applyNormals = (model, debug = false) => {
   if (model) {
     model.traverse(o => {
-      //if(o.isMesh) console.log(o); // debug
-      if (o.isMesh) o.material = new THREE.MeshNormalMaterial()
+      if (o.isMesh) {
+        if (debug) console.log(o);
+        o.material = new THREE.MeshNormalMaterial()
+      }
     })
   }
 }
 
-/*
-const clearScene = () => {
-  while(main.scene.children.length > 0) { 
-    main.scene.remove(main.scene.children[0]); 
-  }
-};*/
-
+/**
+ * Load a model into the scene.  
+ * If there is already a model in the scene, delete it first
+ * @param {*} modelName path of the model to load
+ */
 export const setupModel = (modelName = 'ring_gold_with_diamond.glb') => {
   // set path to models folder
   if (!main.loader) main.loader = new GLTFLoader().setPath(DEFAULT_MODELS_DIR)
 
-  //clearScene()
   // remove old model from the scene, if present
   if(main.model) main.scene.remove(main.model);
 
@@ -87,28 +97,33 @@ export const setupModel = (modelName = 'ring_gold_with_diamond.glb') => {
 
     if (PARAMS.displayNormals) applyNormals(main.model)
 
+    // GUI and Animation are dependent on the current model
     setupGUI()
     animate()
   })
 }
 
-// background either string: 'image1.png', 'image2.hdr', or hex: 0xFFFFFF, 0xEDEDED
 // TODO: also gradients (maybe can do them with lighting?--)
+/**
+ * Load a background into the scene
+ * @param {*} background either a path: 'image1.png', 'image2.hdr', or hex: 0xFFFFFF, 0xEDEDED
+ */
 export const setBackground = background => {
-  //if (main.scene.background === background)
-  //  // continue if same background
-  //  return
-
   // Try setting a file as background
   try {
     const arr = background.split('.')
     if (arr.length < 2) return
     const ext = arr.slice(-1) // last slice is the file extension
 
+    const allowed_extensions = ['hdr', 'hdri', 'png', 'jpg', 'jpeg', 'gif', 'bmp']
+
+    // format not supported
+    if(!allowed_extensions.includes(ext))
+      return
+
     if (ext === 'hdr' || ext === 'hdri') loadHdr(background) // Either a HDR file
     else loadTexture(background) // Or a simple image
-  } catch {
-    // It is just a color string
+  } catch {  // It is just a color string
     main.scene.background = new THREE.Color(background)
   }
 }

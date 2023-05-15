@@ -1,11 +1,6 @@
 // Export Settings
 
 /*
-// parameters TODO: ui in HTML (also light?)
-const angleX = 0.0,
-  angleY = 0.02,
-  angleZ = 0.0
-const scales = [0.5, 1.0, 1.5] // SMALL, MEDIUM, BIG
 
 let bg = 0xff0000 // TODO: option flag to 'apply lights' if HDR
 const useHDRLighting = true
