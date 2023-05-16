@@ -177,17 +177,14 @@ async def fetch_background(bg_name: str):
 @app.get("/randombg")
 async def pick_background():
     try:
-        debug(os.listdir(DIR_UPLOAD_BACKGROUNDS))
         if not os.path.isdir(DIR_UPLOAD_BACKGROUNDS) or len(os.listdir(DIR_UPLOAD_BACKGROUNDS)) == 0:
             return 'ERROR'
         
         bg_path = random.choice(os.listdir(DIR_UPLOAD_BACKGROUNDS))
         bg_path = os.path.join(DIR_UPLOAD_BACKGROUNDS, bg_path)
-        debug(bg_path)
         if not isBackground(bg_path):
             return 'ERROR'
         
-        debug(os.path.basename(bg_path))
         return os.path.basename(bg_path)
     except Exception as e:
         print_exception(e)

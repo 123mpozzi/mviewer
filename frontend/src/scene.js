@@ -1,5 +1,23 @@
 import { THREE, GLTFLoader, RGBELoader, main, PARAMS, setupGUI, animate } from './script.js'
 
+const LIGHT_AMBIENT = "ambientLight"
+const LIGHT_DIRECTIONAL = "directionalLight"
+
+// The items you add to the scene are Object3D objects
+const ambientLight = new THREE.AmbientLight(0xededed, 0.8)
+ambientLight.name = LIGHT_AMBIENT  // and you can label them to search for them later
+const directionalLight = new THREE.DirectionalLight(0xffffff, 1)
+directionalLight.name = LIGHT_DIRECTIONAL
+
+/**
+ * Remove an object from the scene, if it exists
+ * @param {*} object name of the Object3D object to remove from the scene
+ */
+const removeEntity = object => {
+  const selectedObject = main.scene.getObjectByName(object.name);
+  if(selectedObject) main.scene.remove( selectedObject );
+}
+
 export const setupScene = () => {
   // Setup camera
   main.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.25, 20)
@@ -7,22 +25,8 @@ export const setupScene = () => {
   //camera.position.z = 100;
 
   main.scene = new THREE.Scene()
-  setupEnvironment(PARAMS.defaultBackground, PARAMS.useHDRLighting)
+  loadHdr(PARAMS.defaultBackground, PARAMS.useHDRLighting)
   setupModel()
-}
-
-const setupEnvironment = (defaultEnv = PARAMS.defaultBackground, applyEnvLighting = true) => {
-  if (!applyEnvLighting) {
-    // setup decent light if not getting it from environment
-    const ambientLight = new THREE.AmbientLight(0xededed, 0.8)
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1)
-    main.scene.add(ambientLight)
-    main.scene.add(directionalLight)
-    directionalLight.position.set(10, 11, 7)
-  }
-
-  loadHdr(defaultEnv, applyEnvLighting)
-  //loadHdr('abandoned_tiled_room_1k.hdr', false);
 }
 
 /**
@@ -31,14 +35,18 @@ const setupEnvironment = (defaultEnv = PARAMS.defaultBackground, applyEnvLightin
  * @param {*} applyLighting whether to apply the environmental lighting (default is taken from `royal_esplanade_1k.hdr`)
  */
 const loadHdr = (path, applyLighting = true) => {
-  console.log(path)
   if (!main.hdrLoader) main.hdrLoader = new RGBELoader()
 
   main.hdrLoader.load(path, function (texture) {
     texture.mapping = THREE.EquirectangularReflectionMapping // map spheric texture to scene
 
     // Apply good lighting (default is taken from royal_esplanade_1k.hdr)
-    if (applyLighting) main.scene.environment = texture
+    if (applyLighting) {
+      removeEntity(LIGHT_AMBIENT)
+      removeEntity(LIGHT_DIRECTIONAL)
+
+      main.scene.environment = texture
+    }
 
     main.scene.background = texture
     texture.dispose()
@@ -50,12 +58,21 @@ const loadHdr = (path, applyLighting = true) => {
  * @param {*} path URL path of the image
  */
 const loadTexture = path => {
-  console.log(path)
   if (!main.textureLoader) main.textureLoader = new THREE.TextureLoader()
 
   main.textureLoader.load(path, function (texture) {
     main.scene.background = texture
     texture.dispose()
+
+    // unrecommended: setup decent lighting if not wanting to use the light from a HDR environment
+    if (!PARAMS.useHDRLighting) {
+      main.scene.add(ambientLight)
+      main.scene.add(directionalLight)
+      directionalLight.position.set(10, 11, 7)
+    } else {
+      removeEntity(LIGHT_AMBIENT)
+      removeEntity(LIGHT_DIRECTIONAL)
+    }
   })
 }
 
@@ -75,7 +92,6 @@ export const applyNormals = (model, debug = false) => {
     })
   }
 }
-
 
 /**
  * Load a model into the scene.  
@@ -105,26 +121,27 @@ export const setupModel = (path = PARAMS.defaultModel) => {
   })
 }
 
-// TODO: also gradients (maybe can do them with lighting?--)
 /**
- * Load a background into the scene
- * @param {*} url
+ * Load a texture as the scene background
+ * @param {*} url URL of the texture
  */
 export const setBackground = url => {
-  // Try setting a file as background
   fetch(url)
   .then(response => response.text())
   .then((response) => {
     if(!response.includes('.')) return
 
-    console.log(response)
+    // The server responds a string like this: "8123.jpg"
+    // the quotes are included into the string, remove them
+    response = response.replaceAll('"', '')
+
     const path = response.split('.')
-    const ext = path.slice(-1) // last slice is the file extension
+    const ext = path.slice(-1)[0] // last slice is the file extension. Note that slice() returns an Array
 
-    const url = PARAMS.defaultBackground.replace('DEFAULT_BACKGROUND', response.replaceAll('"', ''))
+    const url = PARAMS.defaultBackground.replace('DEFAULT_BACKGROUND', response)
 
-    if (ext === 'hdr' || ext === 'hdri') loadHdr(url) // Either a HDR file
-    else loadTexture(url) // Or a simple image
+    if (ext === 'hdr' || ext === 'hdri') loadHdr(url) // either a HDR file
+    else loadTexture(url) // or a simple image
   })
   .catch(err => console.log(err))
 }

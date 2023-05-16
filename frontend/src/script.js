@@ -31,7 +31,7 @@ export const PARAMS = {
   height: 500,
   /** Default starting bg if error occurs */
   bg: 0xff0000,
-  /** Apply HDR environmental lighting even when setting static texture as background */
+  /** Apply HDR environmental lighting even when setting static texture as background (recommended) */
   useHDRLighting: true,
   /** For debugging purposes: whether to apply on the model its normal map */
   displayNormals: false,

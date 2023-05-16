@@ -63,8 +63,11 @@ export const pickRandom = arr => {
   return arr[Math.floor(Math.random() * arr.length)]
 };
 
-/** Generate random hex color */
-export const genRanHex = size => [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('')
+/** Generate random hex color NUMBER, not string */
+const genRanHex = () => {
+  const n = (Math.random() * 0xfffff * 1000000).toString(16); //  toString(16) change the base to hex
+  return parseInt(n.slice(0, 6), 16);  // 16 as radix for hex representation
+};
 
 /**
  * Reset the screenshots counter and other parameters to prepare for a new screenshot session
@@ -183,34 +186,32 @@ const updateModel = () => {
     PARAMS.count = 0
   }
 
-  if (PARAMS.displayNormals) {
-    applyNormals(main.model) // TODO: works, but then cannot set it back!
-  }
+  // TODO: works, but then cannot set it back!
+  if (PARAMS.displayNormals) applyNormals(main.model)
 }
 
 /**
  * Do a frame animation for the background: change it randomly
+ * @param {*} chanceToUseTexture chance to use a texture as background instead of a uniform color
+ * @param {*} debug whether to print the randomly chosen uniform color
  */
-const updateBackground = () => {
-  if (Math.random() < 0.5) {
-    const randColor = parseInt(genRanHex(6))
-    //main.scene.background = new THREE.Color(randColor)
-  } else {
-    // Use a texture
+const updateBackground = (chanceToUseTexture = 0.5, debug = false) => {
+  // chance to pick a random uniform color as background
+  if (Math.random() < chanceToUseTexture) {
+    const randColor = genRanHex()
+    if(debug) console.log(randColor)
+    main.scene.background = new THREE.Color(randColor)
+  } else {  // otherwise pick a texture
     setBackground(PARAMS.randomBackgroundGET)
   }
 }
 
-/**
- * Render a static scene
- */
+/** Render a static scene */
 const render = () => {
   main.renderer.render(main.scene, main.camera)
 }
 
-/**
- * Render a dynamic scene
- */
+/** Render a dynamic scene */
 export const animate = () => {
   if (main.model) updateModel()
   if (PARAMS.randomBackground) updateBackground()
