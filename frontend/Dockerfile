@@ -5,7 +5,6 @@ ENV PATH /app/node_modules/.bin:$PATH
 COPY package.json  ./
 COPY index.html ./index.html
 COPY ./src ./src
-COPY ./public ./public
 RUN npm install
 RUN npm run build
 

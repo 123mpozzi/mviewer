@@ -1,5 +1,4 @@
 from fastapi import FastAPI, File, UploadFile, Body
-from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
 from fastapi.responses import RedirectResponse, FileResponse
@@ -18,6 +17,8 @@ DIR_UPLOAD_MODELS =  os.path.join(DIR_UPLOAD, 'models')
 DIR_UPLOAD_BACKGROUNDS = os.path.join(DIR_UPLOAD, 'backgrounds')
 DIR_UPLOAD_BACKGROUNDS_ZIP = os.path.join(DIR_UPLOAD, 'backgrounds_zip')
 INDEX = "/index.html"
+DEFAULT_MODEL_PATH = './app/static/models/ring_gold_with_diamond.glb'
+DEFAULT_BACKGROUND_PATH = './app/static/backgrounds/royal_esplanade_1k.hdr' # TODO: /static/..
 
 allowed_ext_archives = ('.zip',)  # leave the comma to indicate Python that this is a tuple, not a str
 allowed_ext_models = ('.glb',)
@@ -47,6 +48,11 @@ def createIfNotExist(path: str):
 def isModel(path: str):
     _, ext = os.path.splitext(path.lower())
     return os.path.isfile(path) and ext in allowed_ext_models
+
+def isBackground(path: str):
+    _, ext = os.path.splitext(path.lower())
+    is_allowed = ext in allowed_ext_images or ext in allowed_ext_environments
+    return os.path.isfile(path) and is_allowed
 
 # Mount the dir "app/static" and assign it the name "static" to use internally
 #app.mount("/static", StaticFiles(directory="app/static"), name="static")
@@ -137,6 +143,9 @@ async def zip_folder(folder_name: str):
 @app.get("/models/{model_name}")
 async def fetch_model(model_name: str):
     try:
+        if model_name == "DEFAULT_MODEL":
+            return FileResponse(path=DEFAULT_MODEL_PATH)
+
         model_path = os.path.join(DIR_UPLOAD_MODELS, model_name)
         if not isModel(model_path):
             return { "message" : "Model not found"}
@@ -146,3 +155,20 @@ async def fetch_model(model_name: str):
     except Exception as e:
         print_exception(e)
         return {"message": "There was an error fetching the model"}
+
+# GET request to retrieve a background
+@app.get("/backgrounds/{bg_name}")
+async def fetch_background(bg_name: str):
+    try:
+        if bg_name == "DEFAULT_BACKGROUND":
+            return FileResponse(path=DEFAULT_BACKGROUND_PATH)
+
+        bg_path = os.path.join(DIR_UPLOAD_BACKGROUNDS, bg_name)
+        if not isBackground(bg_path):
+            return { "message" : "Background not found"}
+        
+        response = FileResponse(path=bg_path, filename=bg_name)
+        return response
+    except Exception as e:
+        print_exception(e)
+        return {"message": "There was an error fetching the background"}

@@ -1,8 +1,5 @@
 import { THREE, GLTFLoader, RGBELoader, main, PARAMS, setupGUI, animate } from './script.js'
 
-// Vite copies 'public' directory to root dist directory by default
-const DEFAULT_BACKGROUNDS_DIR = 'backgrounds/'
-
 export const setupScene = () => {
   // Setup camera
   main.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.25, 20)
@@ -30,11 +27,11 @@ const setupEnvironment = (defaultEnv = PARAMS.defaultBackground, applyEnvLightin
 
 /**
  * Load a HDR environment as background
- * @param {*} path path of the HDR environment
+ * @param {*} path URL path of the HDR environment
  * @param {*} applyLighting whether to apply the environmental lighting (default is taken from `royal_esplanade_1k.hdr`)
  */
 const loadHdr = (path, applyLighting = false) => {
-  if (!main.hdrLoader) main.hdrLoader = new RGBELoader().setPath(DEFAULT_BACKGROUNDS_DIR)
+  if (!main.hdrLoader) main.hdrLoader = new RGBELoader()
 
   main.hdrLoader.load(path, function (texture) {
     texture.mapping = THREE.EquirectangularReflectionMapping // map spheric texture to scene
@@ -49,10 +46,10 @@ const loadHdr = (path, applyLighting = false) => {
 
 /**
  * Load an image as background
- * @param {*} path path of the image
+ * @param {*} path URL path of the image
  */
 const loadTexture = path => {
-  if (!main.textureLoader) main.textureLoader = new THREE.TextureLoader().setPath(DEFAULT_BACKGROUNDS_DIR)
+  if (!main.textureLoader) main.textureLoader = new THREE.TextureLoader()
 
   main.textureLoader.load(path, function (texture) {
     main.scene.background = texture
@@ -81,16 +78,16 @@ export const applyNormals = (model, debug = false) => {
 /**
  * Load a model into the scene.  
  * If there is already a model in the scene, delete it first
- * @param {*} modelName URL path of the resource to load
+ * @param {*} path URL path of the resource to load
  */
-export const setupModel = (modelName = PARAMS.defaultModel) => {
+export const setupModel = (path = PARAMS.defaultModel) => {
   if(!main.loader) main.loader = new GLTFLoader()
 
   // remove old model from the scene, if present
   if(main.model) main.scene.remove(main.model);
 
   // Add GLTF model
-  main.loader.load(modelName, function (gltf) {
+  main.loader.load(path, function (gltf) {
     main.model = gltf.scene
     main.scene.add(main.model)
 
