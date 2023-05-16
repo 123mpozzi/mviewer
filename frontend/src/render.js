@@ -64,7 +64,7 @@ export const pickRandom = arr => {
 };
 
 /** Generate random hex color */
-const genRanHex = size => [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('')
+export const genRanHex = size => [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('')
 
 /**
  * Reset the screenshots counter and other parameters to prepare for a new screenshot session
@@ -193,16 +193,12 @@ const updateModel = () => {
  */
 const updateBackground = () => {
   if (Math.random() < 0.5) {
-    PARAMS.bg = Number(genRanHex(6))
+    const randColor = parseInt(genRanHex(6))
+    //main.scene.background = new THREE.Color(randColor)
   } else {
     // Use a texture
-    // TODO: GET backgrounds from fastAPI and randomize
-    const arr = ['sky.jpg', 'royal_esplanade_1k.hdr', 'abandoned_tiled_room_1k.hdr']
-    //PARAMS.bg = arr[Math.floor(Math.random() * arr.length)]
-    PARAMS.bg = pickRandom(arr)
+    setBackground(PARAMS.randomBackgroundGET)
   }
-
-  setBackground(PARAMS.bg)
 }
 
 /**

@@ -5,7 +5,7 @@ from fastapi.responses import RedirectResponse, FileResponse
 
 from traceback import print_exception
 from pathlib import Path
-import shutil, time, base64, json, os
+import shutil, time, base64, json, os, random
 import aiofiles
 
 
@@ -144,7 +144,7 @@ async def zip_folder(folder_name: str):
 async def fetch_model(model_name: str):
     try:
         if model_name == "DEFAULT_MODEL":
-            return FileResponse(path=DEFAULT_MODEL_PATH)
+            return FileResponse(path=DEFAULT_MODEL_PATH, filename=os.path.basename(DEFAULT_MODEL_PATH))
 
         model_path = os.path.join(DIR_UPLOAD_MODELS, model_name)
         if not isModel(model_path):
@@ -161,7 +161,7 @@ async def fetch_model(model_name: str):
 async def fetch_background(bg_name: str):
     try:
         if bg_name == "DEFAULT_BACKGROUND":
-            return FileResponse(path=DEFAULT_BACKGROUND_PATH)
+            return FileResponse(path=DEFAULT_BACKGROUND_PATH, filename=os.path.basename(DEFAULT_BACKGROUND_PATH))
 
         bg_path = os.path.join(DIR_UPLOAD_BACKGROUNDS, bg_name)
         if not isBackground(bg_path):
@@ -169,6 +169,26 @@ async def fetch_background(bg_name: str):
         
         response = FileResponse(path=bg_path, filename=bg_name)
         return response
+    except Exception as e:
+        print_exception(e)
+        return {"message": "There was an error fetching the background"}
+
+# GET request to retrieve a random background filename (str, not FileResponse)
+@app.get("/randombg")
+async def pick_background():
+    try:
+        debug(os.listdir(DIR_UPLOAD_BACKGROUNDS))
+        if not os.path.isdir(DIR_UPLOAD_BACKGROUNDS) or len(os.listdir(DIR_UPLOAD_BACKGROUNDS)) == 0:
+            return 'ERROR'
+        
+        bg_path = random.choice(os.listdir(DIR_UPLOAD_BACKGROUNDS))
+        bg_path = os.path.join(DIR_UPLOAD_BACKGROUNDS, bg_path)
+        debug(bg_path)
+        if not isBackground(bg_path):
+            return 'ERROR'
+        
+        debug(os.path.basename(bg_path))
+        return os.path.basename(bg_path)
     except Exception as e:
         print_exception(e)
         return {"message": "There was an error fetching the background"}

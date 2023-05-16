@@ -17,6 +17,7 @@ export const PARAMS = {
   scales: [0.5, 1.0, 1.5],
   defaultModel: 'http://localhost:8000/api/models/DEFAULT_MODEL',
   defaultBackground: 'http://localhost:8000/api/backgrounds/DEFAULT_BACKGROUND',
+  randomBackgroundGET: 'http://localhost:8000/api/randombg',
   //defaultBackground: 'royal_esplanade_1k.hdr',
   /** Whether to change background at each frame */
   randomBackground: false,

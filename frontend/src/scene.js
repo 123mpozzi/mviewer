@@ -30,7 +30,8 @@ const setupEnvironment = (defaultEnv = PARAMS.defaultBackground, applyEnvLightin
  * @param {*} path URL path of the HDR environment
  * @param {*} applyLighting whether to apply the environmental lighting (default is taken from `royal_esplanade_1k.hdr`)
  */
-const loadHdr = (path, applyLighting = false) => {
+const loadHdr = (path, applyLighting = true) => {
+  console.log(path)
   if (!main.hdrLoader) main.hdrLoader = new RGBELoader()
 
   main.hdrLoader.load(path, function (texture) {
@@ -49,6 +50,7 @@ const loadHdr = (path, applyLighting = false) => {
  * @param {*} path URL path of the image
  */
 const loadTexture = path => {
+  console.log(path)
   if (!main.textureLoader) main.textureLoader = new THREE.TextureLoader()
 
   main.textureLoader.load(path, function (texture) {
@@ -106,24 +108,23 @@ export const setupModel = (path = PARAMS.defaultModel) => {
 // TODO: also gradients (maybe can do them with lighting?--)
 /**
  * Load a background into the scene
- * @param {*} background either a path: 'image1.png', 'image2.hdr', or hex: 0xFFFFFF, 0xEDEDED
+ * @param {*} url
  */
-export const setBackground = background => {
+export const setBackground = url => {
   // Try setting a file as background
-  try {
-    const arr = background.split('.')
-    if (arr.length < 2) return
-    const ext = arr.slice(-1) // last slice is the file extension
+  fetch(url)
+  .then(response => response.text())
+  .then((response) => {
+    if(!response.includes('.')) return
 
-    const allowed_extensions = ['hdr', 'hdri', 'png', 'jpg', 'jpeg', 'gif', 'bmp']
+    console.log(response)
+    const path = response.split('.')
+    const ext = path.slice(-1) // last slice is the file extension
 
-    // format not supported
-    if(!allowed_extensions.includes(ext))
-      return
+    const url = PARAMS.defaultBackground.replace('DEFAULT_BACKGROUND', response.replaceAll('"', ''))
 
-    if (ext === 'hdr' || ext === 'hdri') loadHdr(background) // Either a HDR file
-    else loadTexture(background) // Or a simple image
-  } catch {  // It is just a color string
-    main.scene.background = new THREE.Color(background)
-  }
+    if (ext === 'hdr' || ext === 'hdri') loadHdr(url) // Either a HDR file
+    else loadTexture(url) // Or a simple image
+  })
+  .catch(err => console.log(err))
 }
