@@ -178,16 +178,22 @@ const updateModel = () => {
   main.model.rotation.y += PARAMS.angleY
   main.model.rotation.z += PARAMS.angleZ
 
-  // Modify scale only every n screenshots  // TODO
-  if (PARAMS.count > PARAMS.nScreens) {
-    //const newScale = PARAMS.scales[Math.floor(Math.random() * PARAMS.scales.length)]
+  // Modify scale
+  if (Math.random() < PARAMS.chanceToModifyScale) {
     const newScale = pickRandom(PARAMS.scales)
     main.model.scale.set(newScale, newScale, newScale)
-    PARAMS.count = 0
   }
 
   // TODO: works, but then cannot set it back!
   if (PARAMS.displayNormals) applyNormals(main.model)
+}
+
+/**
+ * Set the scene background to a uniform color
+ * @param {*} color color to change the background to
+ */
+export const setBackgroundAsColor = (color) => {
+  main.scene.background = new THREE.Color(color)
 }
 
 /**
@@ -200,7 +206,7 @@ const updateBackground = (chanceToUseTexture = 0.5, debug = false) => {
   if (Math.random() < chanceToUseTexture) {
     const randColor = genRanHex()
     if(debug) console.log(randColor)
-    main.scene.background = new THREE.Color(randColor)
+    setBackgroundAsColor(randColor)
   } else {  // otherwise pick a texture
     setBackground(PARAMS.randomBackgroundGET)
   }

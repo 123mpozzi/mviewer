@@ -3,6 +3,26 @@ import { THREE, GLTFLoader, RGBELoader, main, PARAMS, setupGUI, animate } from '
 const LIGHT_AMBIENT = "ambientLight"
 const LIGHT_DIRECTIONAL = "directionalLight"
 
+const modelSelect = document.getElementById('models');
+const reloadSelBtn = document.getElementById('reloadsel');
+
+reloadSelBtn.onclick = function() {
+  // Fetch available models
+  fetch(PARAMS.modelListGET)
+    .then(response => response.text())
+    .then(response => {
+      //response = JSON.stringify(response)
+      console.log(response)
+      console.log(typeof(response))
+
+      response.forEach(modelName => modelSelect.options.add(modelName));
+    })
+    .catch(err => console.log(err))
+
+  // change the rendered model
+}
+
+
 // The items you add to the scene are Object3D objects
 const ambientLight = new THREE.AmbientLight(0xededed, 0.8)
 ambientLight.name = LIGHT_AMBIENT  // and you can label them to search for them later
@@ -25,8 +45,12 @@ export const setupScene = () => {
   //camera.position.z = 100;
 
   main.scene = new THREE.Scene()
-  loadHdr(PARAMS.defaultBackground, PARAMS.useHDRLighting)
+  loadDefaultBackground()
   setupModel()
+}
+
+export const loadDefaultBackground = () => {
+  loadHdr(PARAMS.defaultBackground, PARAMS.useHDRLighting)
 }
 
 /**
@@ -34,7 +58,7 @@ export const setupScene = () => {
  * @param {*} path URL path of the HDR environment
  * @param {*} applyLighting whether to apply the environmental lighting (default is taken from `royal_esplanade_1k.hdr`)
  */
-const loadHdr = (path, applyLighting = true) => {
+const loadHdr = (path, applyLighting = PARAMS.useHDRLighting) => {
   if (!main.hdrLoader) main.hdrLoader = new RGBELoader()
 
   main.hdrLoader.load(path, function (texture) {

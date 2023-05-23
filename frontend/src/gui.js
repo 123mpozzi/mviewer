@@ -1,4 +1,4 @@
-import { main, resizeWindow, setBackground, PARAMS, dat } from './script.js'
+import { main, resizeWindow, setBackgroundAsColor, loadDefaultBackground, PARAMS, dat } from './script.js'
 
 let gui
 
@@ -96,7 +96,7 @@ const addCanvasFolder = gui => {
 
   // listeners
   canvasBackground.onChange(function (value) {
-    setBackground(parseInt(value.slice(1), 16)) // #ffffff to 0xffffff (number)
+    setBackgroundAsColor(parseInt(value.slice(1), 16)) // #ffffff to 0xffffff (number)
   })
   canvasWidth.onChange(function (value) {
     resizeWindow(value, canvas.clientHeight)
@@ -120,6 +120,7 @@ const addModelsFolder = gui => {
     angleX: PARAMS.angleX,
     angleY: PARAMS.angleY,
     angleZ: PARAMS.angleZ,
+    scaleChance: PARAMS.chanceToModifyScale,
     scaleSmall: PARAMS.scales[0],
     scaleMed: PARAMS.scales[1],
     scaleBig: PARAMS.scales[2],
@@ -133,6 +134,7 @@ const addModelsFolder = gui => {
   const modelAngleX = modelFolder.add(modelParams, 'angleX').min(0.0).max(1.0).listen()
   const modelAngleY = modelFolder.add(modelParams, 'angleY').min(0.0).max(1.0).listen()
   const modelAngleZ = modelFolder.add(modelParams, 'angleZ').min(0.0).max(1.0).listen()
+  const modelScaleChance = modelFolder.add(modelParams, 'scaleChance').min(0.0).max(1.0).listen()
   const modelScaleSmall = modelFolder.add(modelParams, 'scaleSmall').min(0.0).max(2.0).listen()
   const modelScaleMed = modelFolder.add(modelParams, 'scaleMed').min(0.0).max(3.0).listen()
   const modelScaleBig = modelFolder.add(modelParams, 'scaleBig').min(0.0).max(5.0).listen()
@@ -148,6 +150,9 @@ const addModelsFolder = gui => {
   })
   modelAngleZ.onChange(function (value) {
     PARAMS.angleZ = value
+  })
+  modelScaleChance.onChange(function (value) {
+    PARAMS.chanceToModifyScale = value
   })
   modelScaleSmall.onChange(function (value) {
     PARAMS.scales[0] = value
@@ -232,8 +237,8 @@ const resetParameters = (current, defaults) => {
 /** Apply given parameters to canvas */
 const updateCanvas = params => {
   resizeWindow(params['width'], params['height'])
-  console.log(PARAMS.defaultBackground)
-  setBackground(PARAMS.defaultBackground) // TODO: fix: only the background is not being reset
+  //setBackground(PARAMS.defaultBackground) // TODO: fix: only the background is not being reset
+  loadDefaultBackground()
 }
 
 const updateModel = params => {}

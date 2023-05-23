@@ -189,3 +189,15 @@ async def pick_background():
     except Exception as e:
         print_exception(e)
         return {"message": "There was an error fetching the background"}
+
+# GET request to retrieve the list of names of available models
+@app.get("/models")
+async def list_models():
+    try:
+        if not os.path.isdir(DIR_UPLOAD_MODELS) or len(os.listdir(DIR_UPLOAD_MODELS)) == 0:
+            return 'ERROR'
+        
+        return os.listdir(DIR_UPLOAD_MODELS)
+    except Exception as e:
+        print_exception(e)
+        return {"message": "There was an error listing the models"}
