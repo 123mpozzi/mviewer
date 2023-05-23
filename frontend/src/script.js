@@ -1,46 +1,46 @@
-// Export Settings
-
-/*
-
-let bg = 0xff0000 // TODO: option flag to 'apply lights' if HDR
-const useHDRLighting = true
+// Export Settings ?
 
 
-// TODO: most of these settings should be possible to change in the GUI, eg: takeScreens, nScreens, scales and angles, displayNormals
-
-*/
-
+/** Global parameters of the application */
 export const PARAMS = {
+  /** Increase on the model's X angle to apply at each model update */
   angleX: 0.0,
+  /** Increase on the model's Y angle to apply at each model update */
   angleY: 0.02,
+  /** Increase on the model's Z angle to apply at each model update */
   angleZ: 0,
+  /** Scale transformations to apply to the model. Should represent SMALL, MEDIUM, BIG sizes */
   scales: [0.5, 1.0, 1.5],
+  /** Chance [0, 1] to trigger a modification on the model's scale at each model update */
   chanceToModifyScale: 0.05,
+  /** Resource representing the default model to load into the scene */
   defaultModel: 'http://localhost:8000/api/models/DEFAULT_MODEL',
+  /** Resource representing the default background to load into the scene */
   defaultBackground: 'http://localhost:8000/api/backgrounds/DEFAULT_BACKGROUND',
+  /** Resource to query to get the URI of a random background  */
   randomBackgroundGET: 'http://localhost:8000/api/randombg',
+  /** Resource to query to get the list of available (uploaded) models */
   modelListGET: 'http://localhost:8000/api/models',
   /** Whether to change background at each frame */
   randomBackground: false,
+  /** Flag to activate the screenshotting function of the application */
   takeScreens: false,
-  /** Model scale will change after this number of screenshots */
+  /** Amount of screenshots to take */
   nScreens: 50,
-  count: 0,
-  /** Rendering canvas width */
+  /** Width of the rendering canvas */
   width: 500,
-  /** Rendering canvas height */
+  /** Height of the rendering canvas */
   height: 500,
-  /** Default starting bg if error occurs */
-  bg: 0xff0000,
-  /** Apply HDR environmental lighting even when setting static texture as background (recommended) */
+  /** Whether to apply the lighting of a HDR environment even when the background is a static texture or a uniform color (recommended). If false, basic lighting will be applied instead */
   useHDRLighting: true,
-  /** For debugging purposes: whether to apply on the model its normal map */
+  /** Whether to apply on the model its normal map (for debugging purposes) */
   displayNormals: false,
   /** Whether to resize the rendering canvas to fit the size of the browser window */
   resizeToWindowSize: false
 }
 
 var camera, scene, renderer, model, textureLoader, hdrLoader, loader
+/** Hold the state of THREE.js objects */
 export const main = {
   get camera () {
     return camera

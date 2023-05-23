@@ -1,4 +1,4 @@
-import { THREE, OrbitControls, PARAMS, main, setBackground, setupScene, applyNormals, enableScreensGUIs, setupModel } from './script.js'
+import { THREE, OrbitControls, PARAMS, main, setBackground, setupScene, applyNormals, enableScreensGUIs, setupModel, udpateLighting } from './script.js'
 
 /** Identifier of the current screenshot session */
 let clientId = Date.now()
@@ -194,6 +194,7 @@ const updateModel = () => {
  */
 export const setBackgroundAsColor = (color) => {
   main.scene.background = new THREE.Color(color)
+  udpateLighting()
 }
 
 /**
@@ -222,9 +223,10 @@ export const animate = () => {
   if (main.model) updateModel()
   if (PARAMS.randomBackground) updateBackground()
 
-  const arrZoom = [0.5, 1.0, 1.5]
+  // TODO: in future, could add controls for camera zoom level too
+  //const arrZoom = [0.5, 1.0, 1.5]
   //const zoom = arrZoom[Math.floor(Math.random() * arrZoom.length)]
-  const zoom = pickRandom(arrZoom)
+  //const zoom = pickRandom(arrZoom)
   //camera.zoom = zoom;
   //camera.updateProjectionMatrix();
 

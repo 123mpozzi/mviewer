@@ -3,27 +3,57 @@ import { THREE, GLTFLoader, RGBELoader, main, PARAMS, setupGUI, animate } from '
 const LIGHT_AMBIENT = "ambientLight"
 const LIGHT_DIRECTIONAL = "directionalLight"
 
+/** HTML element representing a dropdown list filled with available models */
 const modelSelect = document.getElementById('models');
+/** Button to load the list of available models from the server and update {@link modelSelect} */
 const reloadSelBtn = document.getElementById('reloadsel');
+/** Button to render the selected model into the scene */
+const renderSelBtn = document.getElementById('rendersel');
 
 reloadSelBtn.onclick = function() {
   // Fetch available models
   fetch(PARAMS.modelListGET)
-    .then(response => response.text())
+    .then(response => response.json())
     .then(response => {
-      //response = JSON.stringify(response)
       console.log(response)
       console.log(typeof(response))
 
-      response.forEach(modelName => modelSelect.options.add(modelName));
+      // Clear the HTML select element and add the defaut option to the dropdown
+      clearSelectOptions(modelSelect)
+      const optDef = document.createElement('option');
+      optDef.value = 'default';
+      optDef.textContent = 'Default';
+      modelSelect.options.add(optDef)
+
+      // Add each modelName as a dropdown option to the select HTML element
+      response.forEach(modelName => {
+        const opt = document.createElement('option');
+        opt.value = modelName;
+        opt.textContent = modelName;
+
+        modelSelect.options.add(opt)
+      });
     })
     .catch(err => console.log(err))
+}
 
-  // change the rendered model
+renderSelBtn.onclick = function() {
+  // Change the rendered model
+}
+
+/**
+ * Remove all option elements from a dropdown select HTML element
+ * @param {*} selectElement element to remove options from
+ */
+const clearSelectOptions = (selectElement) => {
+  var i, L = selectElement.options.length - 1;
+  for(i = L; i >= 0; i--) {
+    selectElement.remove(i);
+  }
 }
 
 
-// The items you add to the scene are Object3D objects
+// Items you add to the scene are Object3D objects
 const ambientLight = new THREE.AmbientLight(0xededed, 0.8)
 ambientLight.name = LIGHT_AMBIENT  // and you can label them to search for them later
 const directionalLight = new THREE.DirectionalLight(0xffffff, 1)
@@ -54,6 +84,25 @@ export const loadDefaultBackground = () => {
 }
 
 /**
+ * Update the scene lighting settings: either use basic lighting or apply lighting from a HDR environment
+ * @param {*} applyLighting whether to apply lighting from a HDR environment
+ */
+export const udpateLighting = (applyLighting = PARAMS.useHDRLighting) => {
+  // use basic lighting (unrecommended)
+  if (!applyLighting) {
+    // setup decent lighting settings
+    main.scene.add(ambientLight)
+    main.scene.add(directionalLight)
+    directionalLight.position.set(10, 11, 7)
+    // remove environment lighting from scene
+    main.scene.environment = null
+  } else { // remove basic lighting to prepare for HDR lighting
+    removeEntity(LIGHT_AMBIENT)
+    removeEntity(LIGHT_DIRECTIONAL)
+  }
+}
+
+/**
  * Load a HDR environment as background
  * @param {*} path URL path of the HDR environment
  * @param {*} applyLighting whether to apply the environmental lighting (default is taken from `royal_esplanade_1k.hdr`)
@@ -65,12 +114,8 @@ const loadHdr = (path, applyLighting = PARAMS.useHDRLighting) => {
     texture.mapping = THREE.EquirectangularReflectionMapping // map spheric texture to scene
 
     // Apply good lighting (default is taken from royal_esplanade_1k.hdr)
-    if (applyLighting) {
-      removeEntity(LIGHT_AMBIENT)
-      removeEntity(LIGHT_DIRECTIONAL)
-
-      main.scene.environment = texture
-    }
+    udpateLighting(applyLighting)
+    if (applyLighting) main.scene.environment = texture
 
     main.scene.background = texture
     texture.dispose()
@@ -88,15 +133,7 @@ const loadTexture = path => {
     main.scene.background = texture
     texture.dispose()
 
-    // unrecommended: setup decent lighting if not wanting to use the light from a HDR environment
-    if (!PARAMS.useHDRLighting) {
-      main.scene.add(ambientLight)
-      main.scene.add(directionalLight)
-      directionalLight.position.set(10, 11, 7)
-    } else {
-      removeEntity(LIGHT_AMBIENT)
-      removeEntity(LIGHT_DIRECTIONAL)
-    }
+    udpateLighting()
   })
 }
 
