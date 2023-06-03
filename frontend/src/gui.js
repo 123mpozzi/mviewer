@@ -240,6 +240,7 @@ const updateCanvas = params => {
   loadDefaultBackground()
 }
 
+// TODO
 const updateModel = params => {}
 
 /** Apply given parameters to camera */

@@ -1,4 +1,4 @@
-import { THREE, OrbitControls, PARAMS, main, setBackground, setupScene, applyNormals, enableScreensGUIs, setupModel, udpateLighting, config } from './script.js'
+import { THREE, OrbitControls, PARAMS, main, setBackground, setupScene, applyNormals, enableScreensGUIs, udpateLighting, config } from './script.js'
 
 /** Identifier of the current screenshot session */
 let clientId = Date.now()

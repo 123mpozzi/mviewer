@@ -1,4 +1,4 @@
-import { THREE, GLTFLoader, RGBELoader, main, PARAMS, setupGUI, animate, config, DEF_BG_NAME } from './script.js'
+import { THREE, GLTFLoader, RGBELoader, main, PARAMS, setupGUI, animate, config, DEF_BG_NAME, DEF_MODEL_NAME } from './script.js'
 
 const LIGHT_AMBIENT = "ambientLight"
 const LIGHT_DIRECTIONAL = "directionalLight"
@@ -10,13 +10,17 @@ const reloadSelBtn = document.getElementById('reloadsel');
 /** Button to render the selected model into the scene */
 const renderSelBtn = document.getElementById('rendersel');
 
+const debugReloadBtn = false
+
 reloadSelBtn.onclick = function() {
   // Fetch available models
   fetch(config.modelListGET)
     .then(response => response.json())
     .then(response => {
-      console.log(response)
-      console.log(typeof(response))
+      if(debugReloadBtn) {
+        console.log(response)
+        console.log(typeof(response))
+      }
 
       // Clear the HTML select element and add the defaut option to the dropdown
       clearSelectOptions(modelSelect)
@@ -39,14 +43,24 @@ reloadSelBtn.onclick = function() {
 
 renderSelBtn.onclick = function() {
   // Change the rendered model
-  const currentSelectValue = reloadSelBtn.options[reloadSelBtn.selectedIndex].text
+  const currentSelectValue = getSelectValue(modelSelect)
   console.log(currentSelectValue)
-  setupModel(currentSelectValue)
+  const model_url = config.defaultModel.replace(DEF_MODEL_NAME, currentSelectValue)
+  setupModel(model_url)
+}
+
+/**
+ * Return the selected value as text from a \<select> element
+ * @param {*} elem the \<select> as {@link HTMLElement}
+ * @returns current selection value as string
+ */
+const getSelectValue = (elem) => {
+  return elem.options[elem.selectedIndex].text
 }
 
 /**
  * Remove all option elements from a dropdown select HTML element
- * @param {*} selectElement element to remove options from
+ * @param {*} selectElement {@link HTMLElement} to remove options from
  */
 const clearSelectOptions = (selectElement) => {
   var i, L = selectElement.options.length - 1;
@@ -56,7 +70,7 @@ const clearSelectOptions = (selectElement) => {
 }
 
 
-// Items you add to the scene are Object3D objects
+// The items you add to the scene are Object3D objects
 const ambientLight = new THREE.AmbientLight(0xededed, 0.8)
 ambientLight.name = LIGHT_AMBIENT  // and you can label them to search for them later
 const directionalLight = new THREE.DirectionalLight(0xffffff, 1)
@@ -162,7 +176,7 @@ export const applyNormals = (model, debug = false) => {
  * If there is already a model in the scene, delete it first
  * @param {*} path URL path of the resource to load
  */
-export const setupModel = (path = config.defaultModel) => {
+const setupModel = (path = config.defaultModel) => {
   if(!main.loader) main.loader = new GLTFLoader()
 
   // remove old model from the scene, if present
