@@ -75,7 +75,7 @@ const addCanvasFolder = gui => {
     width: PARAMS.width,
     height: PARAMS.height,
     useHDRLighting: PARAMS.useHDRLighting,
-    randomBackground: PARAMS.randomBackground,
+    randomBackground: PARAMS.useRandomBackground,
     reset: () => {
       resetParameters(canvasParams, canvasDefaults)
       updateCanvas(canvasParams)
@@ -105,10 +105,10 @@ const addCanvasFolder = gui => {
     resizeWindow(canvas.clientWidth, value)
   })
   canvasHDRLighting.onChange(function (value) {
-    if (PARAMS.useHDRLighting !== value) PARAMS.useHDRLighting = value // TODO: not working, maybe is setupEnvironment?
+    if (PARAMS.useHDRLighting !== value) PARAMS.useHDRLighting = value
   })
   canvasRandomBackground.onChange(function (value) {
-    if (PARAMS.randomBackground !== value) PARAMS.randomBackground = value
+    if (PARAMS.useRandomBackground !== value) PARAMS.useRandomBackground = value
   })
 }
 
@@ -237,7 +237,6 @@ const resetParameters = (current, defaults) => {
 /** Apply given parameters to canvas */
 const updateCanvas = params => {
   resizeWindow(params['width'], params['height'])
-  //setBackground(PARAMS.defaultBackground) // TODO: fix: only the background is not being reset
   loadDefaultBackground()
 }
 

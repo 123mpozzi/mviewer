@@ -1,7 +1,7 @@
 // Export Settings ?
 
 
-/** Global parameters of the application */
+/** Global parameters used by the application */
 export const PARAMS = {
   /** Increase on the model's X angle to apply at each model update */
   angleX: 0.0,
@@ -13,16 +13,8 @@ export const PARAMS = {
   scales: [0.5, 1.0, 1.5],
   /** Chance [0, 1] to trigger a modification on the model's scale at each model update */
   chanceToModifyScale: 0.05,
-  /** Resource representing the default model to load into the scene */
-  defaultModel: 'http://localhost:8000/api/models/DEFAULT_MODEL',
-  /** Resource representing the default background to load into the scene */
-  defaultBackground: 'http://localhost:8000/api/backgrounds/DEFAULT_BACKGROUND',
-  /** Resource to query to get the URI of a random background  */
-  randomBackgroundGET: 'http://localhost:8000/api/randombg',
-  /** Resource to query to get the list of available (uploaded) models */
-  modelListGET: 'http://localhost:8000/api/models',
   /** Whether to change background at each frame */
-  randomBackground: false,
+  useRandomBackground: false,
   /** Flag to activate the screenshotting function of the application */
   takeScreens: false,
   /** Amount of screenshots to take */
@@ -96,6 +88,7 @@ export { RGBELoader } from 'three/addons/loaders/RGBELoader.js'
 
 export * as dat from 'dat.gui'
 
+export * from './config.js'
 export * from './render.js'
 export * from './scene.js'
 export * from './gui.js'

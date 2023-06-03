@@ -1,4 +1,4 @@
-# 3D Model Viewer for fine-tuning
+# 3D Model Viewer to help fine-tuning
 
 
 Render 3D models in different environments, and catch lots of screenshot samples.  
@@ -12,7 +12,7 @@ Build the application via docker-compose:
 `docker-compose up --build`
 
 Now the application should be running by default at:
-`http://127.0.0.1:8000/index.html`
+`http://localhost:8000/`
 
 
 ## Architecture

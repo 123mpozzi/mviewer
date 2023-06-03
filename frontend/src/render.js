@@ -1,4 +1,4 @@
-import { THREE, OrbitControls, PARAMS, main, setBackground, setupScene, applyNormals, enableScreensGUIs, setupModel, udpateLighting } from './script.js'
+import { THREE, OrbitControls, PARAMS, main, setBackground, setupScene, applyNormals, enableScreensGUIs, setupModel, udpateLighting, config } from './script.js'
 
 /** Identifier of the current screenshot session */
 let clientId = Date.now()
@@ -14,7 +14,25 @@ export const resizeWindow = (width, height) => {
   main.renderer.setSize(width, height)
 }
 
+/** Instead of hardcoding the URL in the HTML document, use the config file */
+const setupUploaderForm = () => {
+  const formId = 'uploader'
+  const form = document.getElementById(formId);
+
+  form.addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    const customUri = config.uploader;
+    // Modify the form's action attribute with the custom URI
+    form.action = customUri;
+    // Submit the form programmatically
+    form.submit();
+  });
+};
+
 export const init = () => {
+  setupUploaderForm()
+
   // HTML container element which will contain the generated canvas
   const container = document.createElement('div')
   document.body.appendChild(container)
@@ -78,15 +96,12 @@ const resetScreenshotSession = () => {
   enableScreensGUIs()  // Re-enable the screenshot controller elements in the GUI
   counter = 0
   clientId = Date.now()  // reset id
-  setupModel('shattered_glass.glb') // TODO: remove, it is just for testing
 };
 
-/**
- * Request and download the screenshots folder from the server
- */
+/** Request and download the screenshots folder from the server */
 const downloadScreenshotFolder = () => {
   let filename
-  fetch('http://localhost:8000/api/zip/' + clientId, {
+  fetch(config.downloadBasePOST + clientId, {
     method: 'GET'
   })  // Handle the FileResponse
     .then(res => {
@@ -129,7 +144,7 @@ const uploadScreenshot = (debug = false) => {
   }
 
   // POST the base64 encoded canvas and the session identifier as JSON
-  fetch('http://localhost:8000/api/screen/', {
+  fetch(config.screenshotPOST, {
     method: 'POST',
     body: JSON.stringify({
       input_data: imgData,
@@ -209,7 +224,7 @@ const updateBackground = (chanceToUseTexture = 0.5, debug = false) => {
     if(debug) console.log(randColor)
     setBackgroundAsColor(randColor)
   } else {  // otherwise pick a texture
-    setBackground(PARAMS.randomBackgroundGET)
+    setBackground(config.randomBackgroundGET)
   }
 }
 
@@ -221,7 +236,7 @@ const render = () => {
 /** Render a dynamic scene */
 export const animate = () => {
   if (main.model) updateModel()
-  if (PARAMS.randomBackground) updateBackground()
+  if (PARAMS.useRandomBackground) updateBackground()
 
   // TODO: in future, could add controls for camera zoom level too
   //const arrZoom = [0.5, 1.0, 1.5]

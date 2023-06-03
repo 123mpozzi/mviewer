@@ -1,4 +1,4 @@
-import { THREE, GLTFLoader, RGBELoader, main, PARAMS, setupGUI, animate } from './script.js'
+import { THREE, GLTFLoader, RGBELoader, main, PARAMS, setupGUI, animate, config, DEF_BG_NAME } from './script.js'
 
 const LIGHT_AMBIENT = "ambientLight"
 const LIGHT_DIRECTIONAL = "directionalLight"
@@ -12,7 +12,7 @@ const renderSelBtn = document.getElementById('rendersel');
 
 reloadSelBtn.onclick = function() {
   // Fetch available models
-  fetch(PARAMS.modelListGET)
+  fetch(config.modelListGET)
     .then(response => response.json())
     .then(response => {
       console.log(response)
@@ -39,6 +39,9 @@ reloadSelBtn.onclick = function() {
 
 renderSelBtn.onclick = function() {
   // Change the rendered model
+  const currentSelectValue = reloadSelBtn.options[reloadSelBtn.selectedIndex].text
+  console.log(currentSelectValue)
+  setupModel(currentSelectValue)
 }
 
 /**
@@ -80,7 +83,7 @@ export const setupScene = () => {
 }
 
 export const loadDefaultBackground = () => {
-  loadHdr(PARAMS.defaultBackground, PARAMS.useHDRLighting)
+  loadHdr(config.defaultBackground, PARAMS.useHDRLighting)
 }
 
 /**
@@ -159,7 +162,7 @@ export const applyNormals = (model, debug = false) => {
  * If there is already a model in the scene, delete it first
  * @param {*} path URL path of the resource to load
  */
-export const setupModel = (path = PARAMS.defaultModel) => {
+export const setupModel = (path = config.defaultModel) => {
   if(!main.loader) main.loader = new GLTFLoader()
 
   // remove old model from the scene, if present
@@ -199,7 +202,7 @@ export const setBackground = url => {
     const path = response.split('.')
     const ext = path.slice(-1)[0] // last slice is the file extension. Note that slice() returns an Array
 
-    const url = PARAMS.defaultBackground.replace('DEFAULT_BACKGROUND', response)
+    const url = config.defaultBackground.replace(DEF_BG_NAME, response)
 
     if (ext === 'hdr' || ext === 'hdri') loadHdr(url) // either a HDR file
     else loadTexture(url) // or a simple image
