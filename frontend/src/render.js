@@ -1,4 +1,4 @@
-import { THREE, OrbitControls, PARAMS, main, setBackground, setupScene, applyNormals, enableScreensGUIs, udpateLighting, config } from './script.js'
+import { THREE, OrbitControls, PARAMS, main, setBackground, setupScene, applyNormals, enableScreensGUIs, udpateLighting, config, setupModelLoader } from './script.js'
 
 /** Identifier of the current screenshot session */
 let clientId = Date.now()
@@ -32,6 +32,7 @@ const setupUploaderForm = () => {
 
 export const init = () => {
   setupUploaderForm()
+  setupModelLoader()
 
   // HTML container element which will contain the generated canvas
   const container = document.createElement('div')

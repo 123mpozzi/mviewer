@@ -18,7 +18,7 @@ DIR_UPLOAD_BACKGROUNDS = os.path.join(DIR_UPLOAD, 'backgrounds')
 DIR_UPLOAD_BACKGROUNDS_ZIP = os.path.join(DIR_UPLOAD, 'backgrounds_zip')
 INDEX = "/index.html"
 DEFAULT_MODEL_PATH = './app/static/models/ring_gold_with_diamond.glb'
-DEFAULT_BACKGROUND_PATH = './app/static/backgrounds/royal_esplanade_1k.hdr' # TODO: /static/..
+DEFAULT_BACKGROUND_PATH = './app/static/backgrounds/royal_esplanade_1k.hdr' # TODO: could use static files? like /static/..
 
 allowed_ext_archives = ('.zip',)  # leave the comma to indicate Python that this is a tuple, not a str
 allowed_ext_models = ('.glb',)
@@ -126,7 +126,7 @@ async def zip_folder(folder_name: str):
     try:
         out_dir = os.path.join(DIR_SCREENS, folder_name)
         if not os.path.isdir(out_dir):
-            return { "message" : "Folder not found"}  # TODO: may cause problem with response_class as this is JSON object (dict)
+            return { "message" : "Folder not found"}  # TODO: may cause problem with response_class as this is JSON object (dict). The issue is that there are multiple response types in this method
 
         out_zip = out_dir + '_archive'
 

@@ -4,11 +4,11 @@
 /** Global parameters used by the application */
 export const PARAMS = {
   /** Increase on the model's X angle to apply at each model update */
-  angleX: 0.0,
+  angleX: 0.00,
   /** Increase on the model's Y angle to apply at each model update */
   angleY: 0.02,
   /** Increase on the model's Z angle to apply at each model update */
-  angleZ: 0,
+  angleZ: 0.00,
   /** Scale transformations to apply to the model. Should represent SMALL, MEDIUM, BIG sizes */
   scales: [0.5, 1.0, 1.5],
   /** Chance [0, 1] to trigger a modification on the model's scale at each model update */

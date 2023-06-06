@@ -1,4 +1,4 @@
-import { main, resizeWindow, setBackgroundAsColor, loadDefaultBackground, PARAMS, dat } from './script.js'
+import { main, resizeWindow, setBackgroundAsColor, loadDefaultBackground, setupSelectedModel, PARAMS, dat } from './script.js'
 
 let gui
 
@@ -131,6 +131,7 @@ const addModelsFolder = gui => {
   }
   modelDefaults = Object.assign({}, modelParams)
 
+  // TODO: angleX and angleZ goes directly from 0 to 1 without float scaling in the GUI, even if the float scaling are applied to the model
   const modelAngleX = modelFolder.add(modelParams, 'angleX').min(0.0).max(1.0).listen()
   const modelAngleY = modelFolder.add(modelParams, 'angleY').min(0.0).max(1.0).listen()
   const modelAngleZ = modelFolder.add(modelParams, 'angleZ').min(0.0).max(1.0).listen()
@@ -193,23 +194,23 @@ const addCameraFolder = gui => {
   // listeners
   cameraAspect.onChange(function (value) {
     main.camera.aspect = value
-    main.camera.updateProjectionMatrix()
+    applyCameraChanges()
   })
   cameraFov.onChange(function (value) {
     main.camera.fov = value
-    main.camera.updateProjectionMatrix()
+    applyCameraChanges()
   })
   cameraX.onChange(function (value) {
     main.camera.position.x = value
-    main.camera.updateProjectionMatrix()
+    applyCameraChanges()
   })
   cameraY.onChange(function (value) {
     main.camera.position.y = value
-    main.camera.updateProjectionMatrix()
+    applyCameraChanges()
   })
   cameraZ.onChange(function (value) {
     main.camera.position.z = value
-    main.camera.updateProjectionMatrix()
+    applyCameraChanges()
   })
 }
 
@@ -223,7 +224,7 @@ const addDebugFolder = gui => {
 
   // listeners
   debugNormals.onChange(function (value) {
-    if (PARAMS.displayNormals !== value) PARAMS.displayNormals = value // TODO
+    if (PARAMS.displayNormals !== value) PARAMS.displayNormals = value // TODO works, but then cannot set it back!
   })
 }
 
@@ -240,15 +241,30 @@ const updateCanvas = params => {
   loadDefaultBackground()
 }
 
-// TODO
-const updateModel = params => {}
+/** Apply given parameters to the current model */
+const updateModel = params => {
+  PARAMS.angleX = params.angleX
+  PARAMS.angleY = params.angleY
+  PARAMS.angleZ = params.angleZ
+  PARAMS.chanceToModifyScale = params.scaleChance
+  PARAMS.scales[0] = params.scaleSmall
+  PARAMS.scales[1] = params.scaleMed
+  PARAMS.scales[2] = params.scaleBig
+  setupSelectedModel()
+}
 
-/** Apply given parameters to camera */
+/** Function used to update the camera in the scene after a change of parameters */
+const applyCameraChanges = () => {
+  // Updates the camera projection matrix. Must be called after any change of parameters.
+  main.camera.updateProjectionMatrix()
+}
+
+/** Apply given parameters to the camera */
 const updateCamera = params => {
   main.camera.aspect = params.aspect
   main.camera.fov = params.fov
   main.camera.position.x = params.positionX
   main.camera.position.y = params.positionY
   main.camera.position.z = params.positionZ
-  main.camera.updateProjectionMatrix()
+  applyCameraChanges()
 }

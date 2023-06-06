@@ -10,44 +10,6 @@ const reloadSelBtn = document.getElementById('reloadsel');
 /** Button to render the selected model into the scene */
 const renderSelBtn = document.getElementById('rendersel');
 
-const debugReloadBtn = false
-
-reloadSelBtn.onclick = function() {
-  // Fetch available models
-  fetch(config.modelListGET)
-    .then(response => response.json())
-    .then(response => {
-      if(debugReloadBtn) {
-        console.log(response)
-        console.log(typeof(response))
-      }
-
-      // Clear the HTML select element and add the defaut option to the dropdown
-      clearSelectOptions(modelSelect)
-      const optDef = document.createElement('option');
-      optDef.value = 'default';
-      optDef.textContent = 'Default';
-      modelSelect.options.add(optDef)
-
-      // Add each modelName as a dropdown option to the select HTML element
-      response.forEach(modelName => {
-        const opt = document.createElement('option');
-        opt.value = modelName;
-        opt.textContent = modelName;
-
-        modelSelect.options.add(opt)
-      });
-    })
-    .catch(err => console.log(err))
-}
-
-renderSelBtn.onclick = function() {
-  // Change the rendered model
-  const currentSelectValue = getSelectValue(modelSelect)
-  console.log(currentSelectValue)
-  const model_url = config.defaultModel.replace(DEF_MODEL_NAME, currentSelectValue)
-  setupModel(model_url)
-}
 
 /**
  * Return the selected value as text from a \<select> element
@@ -67,6 +29,59 @@ const clearSelectOptions = (selectElement) => {
   for(i = L; i >= 0; i--) {
     selectElement.remove(i);
   }
+}
+
+/** Change the rendered model to the selected element in the dropdown */
+export const setupSelectedModel = () => {
+  const currentSelectValue = getSelectValue(modelSelect)
+
+  // If asking to render the default model
+  if(currentSelectValue === 'Default') {
+    setupModel()
+    return
+  }
+
+  // else, get the url of the selected model
+  const model_url = config.defaultModel.replace(DEF_MODEL_NAME, currentSelectValue)
+  setupModel(model_url)
+}
+
+/** Fetch the available models from the server and add them to the select dropdown element */
+export const fetchAvailableModels = (debugReloadBtn = false) => {
+  // Fetch available models
+  fetch(config.modelListGET)
+  .then(response => response.json())
+  .then(response => {
+    if(debugReloadBtn) {
+      console.log(response)
+      console.log(typeof(response))
+    }
+
+    // Clear the HTML select element and add the defaut option to the dropdown
+    clearSelectOptions(modelSelect)
+    const optDef = document.createElement('option');
+    optDef.value = 'default';
+    optDef.textContent = 'Default';
+    modelSelect.options.add(optDef)
+
+    // Add each modelName as a dropdown option to the select HTML element
+    response.forEach(modelName => {
+      const opt = document.createElement('option');
+      opt.value = modelName;
+      opt.textContent = modelName;
+
+      modelSelect.options.add(opt)
+    });
+  })
+  .catch(err => console.log(err))
+}
+
+/** Setup the HTML elements needed for model loading */
+export const setupModelLoader = () => {
+  // Note that using declared const mean they get called at least once on script loading
+  // so in this case, the list of models get loaded without the need of clicking the button
+  // for the first time
+  reloadSelBtn.onclick = fetchAvailableModels();
 }
 
 
@@ -176,7 +191,9 @@ export const applyNormals = (model, debug = false) => {
  * If there is already a model in the scene, delete it first
  * @param {*} path URL path of the resource to load
  */
-const setupModel = (path = config.defaultModel) => {
+const setupModel = (path = config.defaultModel, debugScene = false) => {
+  if(debugScene) console.log(main.scene.children)
+
   if(!main.loader) main.loader = new GLTFLoader()
 
   // remove old model from the scene, if present
@@ -222,4 +239,23 @@ export const setBackground = url => {
     else loadTexture(url) // or a simple image
   })
   .catch(err => console.log(err))
+}
+
+
+// Button to change the rendered model
+// It is not coded inside {@link setupModelLoader} or else it will get called automatically
+// once, rendering a static model without animation in addition to the correct one
+// TODO: fix this and merge with {@link setupSelectedModel}
+renderSelBtn.onclick = function() {
+  const currentSelectValue = getSelectValue(modelSelect)
+
+  // If asking to render the default model
+  if(currentSelectValue === 'Default') {
+    setupModel()
+    return
+  }
+
+  // else, get the url of the selected model
+  const model_url = config.defaultModel.replace(DEF_MODEL_NAME, currentSelectValue)
+  setupModel(model_url)
 }
