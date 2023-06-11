@@ -5,3 +5,16 @@ body {
 canvas {
     display: block;
 }
+input {
+    margin-right: 0; /* Override water.css or else there is an issue with dat.gui */
+}
+input, select {
+    display: inline-block;
+}
+.model-selector {
+    display: flex;
+    flex-direction: column;
+}
+.dg {
+    font: 13px 'Lucida Grande', sans-serif !important; /* Bigger dat.gui text */
+}

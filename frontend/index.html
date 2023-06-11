@@ -5,18 +5,36 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>mViewer</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/dark.css">
     <link type="text/css" href="src/style.css">
 </head>
 <body>
-    <form id="uploader" method="POST" enctype="multipart/form-data">
-        <input type="file" name="file" />
-        <input type="submit"/>
-    </form>
-    <select name="models" id="models">
-        <option value="default">Default</option>
-    </select>
-    <button value='reload' id='reloadsel' name='reloadsel'>reload</button>
-    <button value='render' id='rendersel' name='rendersel'>render</button>
+    <div>
+       <div>
+            <details>
+                <summary>Available formats</summary>
+                <p>Models: .glb</p>
+                <p>Background-Image: .png, .jpg, .jpeg, .gif, .bmp</p>
+                <p>Background-Environment: .hdr, .hdri</p>
+                <p>Archives: .zip</p>
+            </details>
+            <span>Upload data (glb models, background, zip of backgrounds):</span>
+            <form id="uploader" method="POST" enctype="multipart/form-data">
+                <input type="file" name="file" />
+                <input type="submit"/>
+            </form>
+        </div>
+        <div class="model-selector">
+            <span>Model:</span>
+            <div> 
+                <select name="models" id="models">
+                    <option value="default">Default</option>
+                </select>
+                <button value='reload' id='reloadsel' name='reloadsel'>reload</button>
+                <button value='render' id='rendersel' name='rendersel'>render</button>
+            </div>
+        </div>
+    </div>
     <script type="module" src="src/script.js"></script>
     <script type="module" src="src/render.js"></script>
     <script type="module" src="src/scene.js"></script>
