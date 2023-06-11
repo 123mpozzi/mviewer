@@ -2,8 +2,10 @@
 
 
 Render 3D models in different environments, and catch lots of screenshot samples.  
-The aim of this project is to help people improve their machine learning models.
+The aim of this project is to help people improve their machine learning models.  
 
+
+![alt text](screen.png "Title")
 
 ## Setup
 

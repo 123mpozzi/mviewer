@@ -201,3 +201,5 @@ async def list_models():
     except Exception as e:
         print_exception(e)
         return {"message": "There was an error listing the models"}
+
+# TODO: could add Admin section in frontend which requests the cleanup of models, backgrounds, screenshots folders
